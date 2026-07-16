@@ -1,654 +1,1008 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="html-root">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>إدارة العمال والحسابات Pro</title>
-  
-  <!-- ربط ملف الـ Manifest للـ PWA -->
-  <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#0f172a">
-  
-  <!-- خط تاجويل الأنيق للغة العربية -->
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-    }
-  </script>
-  
-  <style>
-    body { 
-      font-family: 'Tajawal', sans-serif; 
-      transition: background-color 0.3s ease, color 0.3s ease; 
-      overflow-x: hidden;
-    }
-    
-    /* أنيميشن ناعمة ومضمونة بدون مشاكل الاختفاء */
-    .page { 
-      display: none; 
-      opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 0.25s ease, transform 0.25s ease;
-    }
-    .page.active { 
-      display: flex; 
-      opacity: 1;
-      transform: translateY(0);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>متابعة العمال | Worker Tracker</title>
+<meta name="description" content="نظام إدارة العمال وحساباتهم اليومية">
+<meta id="theme-color-meta" name="theme-color" content="#0B1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link id="manifest-link" rel="manifest" href="manifest.json">
+<link id="apple-touch-icon" rel="apple-touch-icon" href="">
+<link id="favicon-icon" rel="icon" href="">
 
-    /* حركات ناعمة للأزرار */
-    .btn-press {
-      transition: transform 0.1s ease;
-    }
-    .btn-press:active {
-      transform: scale(0.96);
-    }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800;900&family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 
-    /* Glassmorphism Effect */
-    .glass {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Cairo', 'sans-serif'],
+          body: ['Tajawal', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace']
+        },
+        keyframes: {
+          fadeInUp: { '0%': { opacity: 0, transform: 'translateY(16px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
+          popIn: { '0%': { opacity: 0, transform: 'scale(0.92)' }, '100%': { opacity: 1, transform: 'scale(1)' } },
+          shimmer: { '0%': { backgroundPosition: '0% 0%' }, '100%': { backgroundPosition: '200% 0%' } },
+          spinSlow: { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } }
+        },
+        animation: {
+          fadeInUp: 'fadeInUp 0.45s cubic-bezier(0.16,1,0.3,1) both',
+          popIn: 'popIn 0.28s cubic-bezier(0.16,1,0.3,1) both',
+          shimmer: 'shimmer 2.4s linear infinite',
+          spinSlow: 'spinSlow 1.1s linear infinite'
+        }
+      }
     }
-    .dark .glass {
-      background: rgba(30, 41, 59, 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
+  };
+</script>
 
-    /* مظهر مخصص للـ Scrollbar */
-    ::-webkit-scrollbar {
-      width: 5px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(156, 163, 175, 0.3);
-      border-radius: 10px;
-    }
-  </style>
+<style>
+  :root { color-scheme: light dark; }
+  * { -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overscroll-behavior-y: none; }
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: #F4F6FB;
+    transition: background-color 0.35s ease, color 0.35s ease;
+  }
+  html.dark body { background: #070B14; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.4); border-radius: 999px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  .page {
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: opacity 0.32s cubic-bezier(0.16,1,0.3,1), transform 0.32s cubic-bezier(0.16,1,0.3,1);
+  }
+  .page.page-hidden-state { opacity: 0; transform: translateY(14px) scale(0.99); pointer-events: none; }
+  .page.page-visible-state { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+
+  .glass {
+    background: rgba(255,255,255,0.65);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(15,23,42,0.08);
+  }
+  html.dark .glass {
+    background: rgba(15,23,42,0.55);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .glass-strong {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(15,23,42,0.08);
+  }
+  html.dark .glass-strong {
+    background: rgba(9,13,24,0.72);
+    border: 1px solid rgba(255,255,255,0.09);
+  }
+
+  .hazard-stripe {
+    background-image: repeating-linear-gradient(135deg, #F59E0B 0px, #F59E0B 12px, #0F172A 12px, #0F172A 24px);
+    opacity: 0.9;
+  }
+  html.dark .hazard-stripe { opacity: 0.85; }
+
+  .num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+
+  .btn-press { transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.2s ease; }
+  .btn-press:active { transform: scale(0.95); }
+
+  .input-field {
+    width: 100%;
+    border-radius: 1rem;
+    padding: 0.85rem 1.1rem;
+    background: rgba(148,163,184,0.12);
+    border: 1px solid rgba(148,163,184,0.25);
+    outline: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    color: inherit;
+  }
+  .input-field:focus { border-color: #F59E0B; box-shadow: 0 0 0 3px rgba(245,158,11,0.18); background: rgba(148,163,184,0.18); }
+  html.dark .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+  html.dark .input-field:focus { background: rgba(255,255,255,0.08); }
+
+  .switch { width: 52px; height: 30px; border-radius: 999px; position: relative; cursor: pointer; transition: background-color 0.25s ease; background: rgba(148,163,184,0.35); }
+  .switch.on { background: #10B981; }
+  .switch-dot { position: absolute; top: 3px; right: 3px; width: 24px; height: 24px; border-radius: 999px; background: white; transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+  .switch.on .switch-dot { transform: translateX(-22px); }
+
+  .worker-card { animation: fadeInUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+  .toast-item { animation: popIn 0.25s cubic-bezier(0.16,1,0.3,1) both; }
+  .modal-overlay { animation: fadeInUp 0.2s ease both; }
+
+  .skeleton { background: linear-gradient(90deg, rgba(148,163,184,0.15) 25%, rgba(148,163,184,0.3) 37%, rgba(148,163,184,0.15) 63%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+
+  table.ledger { border-collapse: separate; border-spacing: 0 10px; width: 100%; }
+  table.ledger td { background: rgba(148,163,184,0.08); }
+  html.dark table.ledger td { background: rgba(255,255,255,0.03); }
+  table.ledger tr td:first-child { border-top-right-radius: 0.85rem; border-bottom-right-radius: 0.85rem; }
+  table.ledger tr td:last-child { border-top-left-radius: 0.85rem; border-bottom-left-radius: 0.85rem; }
+</style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 dark:bg-[#0f172a] dark:text-slate-100 min-h-screen flex flex-col justify-between">
+<body class="font-body text-slate-800 dark:text-slate-100 antialiased">
 
-  <!-- ==================== 🔔 نظام الإشعارات الحديث (Toasts) ==================== -->
-  <div id="toastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2.5 w-full max-w-sm px-4"></div>
-
-  <!-- ==================== 1. شاشة تسجيل الدخول ==================== -->
-  <div id="loginPage" class="page active min-h-screen flex-col items-center justify-center p-4">
-    <div class="glass p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 dark:border-slate-800 relative">
-      <!-- زر تغيير الثيم الفوق -->
-      <button onclick="toggleDarkMode()" class="absolute top-5 left-5 p-2.5 rounded-xl bg-white/50 dark:bg-slate-800/50 text-xl btn-press border border-slate-100 dark:border-slate-700">🌓</button>
-
-      <div class="text-center mb-8">
-        <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">تسجيل الدخول</h2>
-        <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm font-medium">مرحبا بك! أدخل نمرة التلفون والكود باش تبدا</p>
-      </div>
-
-      <form id="loginForm" class="space-y-5">
-        <div>
-          <label class="block text-slate-700 dark:text-slate-300 text-sm font-bold mb-2">رقم الهاتف</label>
-          <input type="tel" id="loginPhone" placeholder="0612345678" required 
-                 class="w-full px-4 py-3.5 border border-slate-200 dark:border-slate-700 dark:bg-slate-800/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-left transition" dir="ltr">
-        </div>
-
-        <div>
-          <label class="block text-slate-700 dark:text-slate-300 text-sm font-bold mb-2">كلمة المرور (الكود)</label>
-          <input type="password" id="loginPassword" placeholder="••••••••" required 
-                 class="w-full px-4 py-3.5 border border-slate-200 dark:border-slate-700 dark:bg-slate-800/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-left transition" dir="ltr">
-        </div>
-
-        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-2xl transition duration-200 shadow-lg shadow-blue-500/20 dark:shadow-none btn-press">
-          دخول للتطبيق
-        </button>
-      </form>
-
-      <div class="mt-8 text-center text-sm">
-        <span class="text-slate-500 dark:text-slate-400">ما عندكش حساب؟</span>
-        <button onclick="switchPage('registerPage')" class="text-blue-600 dark:text-blue-400 font-extrabold hover:underline ml-1">إنشاء حساب جديد (Inscription)</button>
-      </div>
-    </div>
+<div id="page-loading" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#F4F6FB] dark:bg-[#070B14] transition-colors duration-300">
+  <div class="flex flex-col items-center gap-4">
+    <div class="w-14 h-14 rounded-2xl border-4 border-amber-500/30 border-t-amber-500 animate-spinSlow"></div>
+    <p class="font-display font-bold text-slate-400 dark:text-slate-500 text-sm">جارِ التحميل...</p>
   </div>
+</div>
 
-  <!-- ==================== 2. شاشة إنشاء حساب جديد (مخفية تماماً) ==================== -->
-  <div id="registerPage" class="page min-h-screen flex-col items-center justify-center p-4">
-    <div class="glass p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 dark:border-slate-800 relative">
-      <div class="text-center mb-8">
-        <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400">حساب جديد</h2>
-        <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm font-medium">سجل دغيا وبطريقة آمنة فابور</p>
+<div id="page-login" class="page page-hidden-state hidden">
+  <div class="min-h-full flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+    <div class="absolute -top-24 -right-24 w-72 h-72 bg-amber-500/20 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl"></div>
+
+    <div class="w-full max-w-sm relative z-10 animate-fadeInUp">
+      <div class="flex flex-col items-center mb-8">
+        <div class="w-16 h-16 rounded-2xl bg-slate-900 dark:bg-white/10 flex items-center justify-center mb-4 relative overflow-hidden shadow-xl">
+          <div class="absolute bottom-0 right-0 left-0 h-2 hazard-stripe"></div>
+          <svg class="w-8 h-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM3.75 20.25a8.25 8.25 0 0116.5 0"/></svg>
+        </div>
+        <h1 class="font-display font-extrabold text-2xl">متابعة العمال</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">سجّل الدخول لإدارة حسابات العمال</p>
       </div>
 
-      <form id="registerForm" class="space-y-5">
+      <form id="form-login" class="glass-strong rounded-3xl p-6 shadow-2xl shadow-slate-900/5 flex flex-col gap-4">
+        <div id="login-error" class="hidden text-rose-500 bg-rose-500/10 border border-rose-500/20 text-sm rounded-xl px-4 py-2.5"></div>
+
         <div>
-          <label class="block text-slate-700 dark:text-slate-300 text-sm font-bold mb-2">رقم الهاتف</label>
-          <input type="tel" id="registerPhone" placeholder="0612345678" required 
-                 class="w-full px-4 py-3.5 border border-slate-200 dark:border-slate-700 dark:bg-slate-800/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-left transition" dir="ltr">
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block">رقم الهاتف</label>
+          <input required id="login-phone" type="tel" inputmode="numeric" dir="ltr" placeholder="0600000000" class="input-field text-left">
         </div>
 
         <div>
-          <label class="block text-slate-700 dark:text-slate-300 text-sm font-bold mb-2">كلمة المرور (الكود)</label>
-          <input type="password" id="registerPassword" placeholder="••••••••" required 
-                 class="w-full px-4 py-3.5 border border-slate-200 dark:border-slate-700 dark:bg-slate-800/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-left transition" dir="ltr">
-        </div>
-
-        <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-4 rounded-2xl transition duration-200 shadow-lg shadow-emerald-500/20 dark:shadow-none btn-press">
-          إنشاء الحساب والولوج
-        </button>
-      </form>
-
-      <div class="mt-8 text-center text-sm">
-        <span class="text-slate-500 dark:text-slate-400">عندك حساب ديجا؟</span>
-        <button onclick="switchPage('loginPage')" class="text-blue-600 dark:text-blue-400 font-extrabold hover:underline ml-1">تسجيل الدخول</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== 3. الشاشة الرئيسية (لائحة العمال) ==================== -->
-  <div id="mainPage" class="page min-h-screen flex-col justify-between">
-    <!-- الرأس (Header) -->
-    <header class="glass border-b border-slate-100 dark:border-slate-800/80 py-4 px-6 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-      <div class="flex items-center space-x-3 space-x-reverse">
-        <h1 class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-300">لائحة العمال</h1>
-        <button id="notiBtn" onclick="requestNotificationPermission()" class="p-2.5 bg-yellow-50 dark:bg-yellow-950/20 rounded-xl text-yellow-600 dark:text-yellow-400 transition hover:scale-105 active:scale-95" title="تفعيل الإشعارات">
-          🔔
-        </button>
-        <button onclick="toggleDarkMode()" class="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl transition hover:scale-105 active:scale-95" title="تبديل المظهر">
-          🌓
-        </button>
-      </div>
-      <button onclick="logout()" class="text-rose-500 hover:text-rose-600 font-bold px-4 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/20 transition active:scale-95">
-        خروج
-      </button>
-    </header>
-
-    <!-- قائمة العمال -->
-    <main class="flex-1 p-6 max-w-md mx-auto w-full space-y-4 overflow-y-auto">
-      <div id="offlineAlert" class="hidden bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 px-4 py-3.5 rounded-2xl text-center text-sm font-bold transition">
-        ⚠️ راك خدام بلا ريزو. غيتزامن كلشي فاش ترجع الأنترنيت!
-      </div>
-
-      <div id="workersList" class="space-y-3.5">
-        <p class="text-slate-400 text-center py-8 font-medium">جاري التحميل بسرور...</p>
-      </div>
-    </main>
-
-    <!-- إضافة عامل جديد فـ الأسفل -->
-    <footer class="glass border-t border-slate-100 dark:border-slate-800/80 p-4 max-w-md mx-auto w-full sticky bottom-0">
-      <form id="addWorkerForm" class="flex items-center space-x-3 space-x-reverse">
-        <input type="text" id="workerNameInput" placeholder="سمية الخدام الجديد..." required
-               class="flex-1 px-4 py-3.5 border border-slate-200 dark:border-slate-700 dark:bg-slate-800/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner">
-        <button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-6 py-3.5 rounded-2xl transition hover:shadow-lg hover:shadow-blue-500/10 active:scale-95">
-          إضافة
-        </button>
-      </form>
-    </footer>
-  </div>
-
-  <!-- ==================== 4. شاشة إدخال البيانات اليومية (Work Tracker) ==================== -->
-  <div id="workTrackerPage" class="page min-h-screen flex-col p-4 bg-gradient-to-b from-blue-600 to-indigo-700 dark:from-slate-900 dark:to-slate-950">
-    <!-- الرأس (Header) -->
-    <header class="flex items-center justify-between p-2 mb-6 w-full">
-      <button onclick="switchPage('mainPage')" class="p-3 bg-white/10 dark:bg-slate-800 hover:bg-white/20 rounded-2xl text-white shadow-md transition btn-press">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-      </button>
-      <div class="px-6 py-2.5 bg-white/10 dark:bg-slate-800/80 rounded-2xl shadow-lg border border-white/15 backdrop-blur-md">
-        <h1 id="workerNameDisplay" class="text-xl font-black text-white">اسم العامل</h1>
-      </div>
-      <button onclick="toggleDarkMode()" class="p-3 bg-white/10 dark:bg-slate-800 hover:bg-white/20 rounded-2xl text-white transition btn-press">🌓</button>
-    </header>
-
-    <!-- القسم الأوسط -->
-    <main class="flex-1 flex flex-col items-center max-w-md mx-auto w-full space-y-6">
-      <div class="text-center p-5 bg-white/10 dark:bg-slate-800/40 rounded-3xl border border-white/20 w-48 shadow-xl backdrop-blur-md">
-        <div class="text-6xl mb-2 filter drop-shadow">👷‍♂️</div>
-        <h2 class="text-sm font-black text-white/90 uppercase tracking-widest">Work Tracker</h2>
-      </div>
-
-      <form id="addLogForm" class="w-full space-y-4">
-        <!-- حقل العمل -->
-        <div class="flex items-center justify-between bg-white/10 dark:bg-slate-800/40 p-5 rounded-2xl shadow-lg border border-white/10 backdrop-blur-sm transition hover:bg-white/15">
-          <span class="text-lg font-bold text-white">العمل (واش خدم؟)</span>
-          <input type="checkbox" id="logStatus" class="w-6 h-6 text-blue-600 bg-transparent border-white/30 rounded focus:ring-blue-500 cursor-pointer">
-        </div>
-
-        <!-- حقل المصروف -->
-        <div class="flex items-center justify-between bg-white/10 dark:bg-slate-800/40 p-5 rounded-2xl shadow-lg border border-white/10 backdrop-blur-sm transition hover:bg-white/15">
-          <span class="text-lg font-bold text-white">المصروف (دراهم)</span>
-          <input type="number" id="logExpense" placeholder="اختياري (0)"
-                 class="w-32 px-2 py-1 border-b-2 border-white/40 focus:border-white bg-transparent text-white placeholder-white/50 text-xl font-black focus:outline-none text-center">
-        </div>
-
-        <!-- حقل التاريخ -->
-        <div class="flex items-center justify-between bg-white/10 dark:bg-slate-800/40 p-5 rounded-2xl shadow-lg border border-white/10 backdrop-blur-sm transition hover:bg-white/15">
-          <span class="text-lg font-bold text-white">التاريخ :</span>
-          <div class="flex flex-col items-end">
-            <input type="date" id="logDate" class="px-2 py-1 bg-transparent text-white font-bold focus:outline-none text-center text-sm cursor-pointer">
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block">كلمة المرور</label>
+          <div class="relative">
+            <input required id="login-password" type="password" dir="ltr" placeholder="••••••••" class="input-field text-left pl-11">
+            <button type="button" data-toggle-pass="login-password" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </button>
           </div>
         </div>
+
+        <button id="login-submit" type="submit" class="btn-press w-full bg-slate-900 dark:bg-amber-500 hover:bg-slate-800 dark:hover:bg-amber-400 text-white dark:text-slate-900 font-display font-bold py-3.5 rounded-2xl mt-2 flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10">
+          <span>تسجيل الدخول</span>
+        </button>
+
+        <p class="text-center text-sm text-slate-500 dark:text-slate-400">
+          ليس لديك حساب؟
+          <button type="button" data-nav="page-register" class="text-amber-600 dark:text-amber-400 font-bold">إنشاء حساب</button>
+        </p>
       </form>
-    </main>
-
-    <!-- الأزرار السفلية -->
-    <footer class="mt-8 flex justify-center space-x-4 space-x-reverse max-w-md mx-auto w-full">
-        <button type="submit" form="addLogForm" class="flex-1 py-4 bg-amber-500 hover:bg-amber-600 text-slate-905 text-lg font-black rounded-2xl shadow-lg transition duration-200 btn-press">
-            إضافة يوم عمل
-        </button>
-        <button type="button" onclick="openWorkerDetails()" class="flex-1 py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-lg font-black rounded-2xl shadow-lg transition duration-200 btn-press">
-            جدول الحسابات
-        </button>
-    </footer>
+    </div>
   </div>
+</div>
 
-  <!-- ==================== 5. شاشة السجل التاريخي (الجدول) ==================== -->
-  <div id="detailsPage" class="page min-h-screen flex-col justify-between">
-    <!-- الرأس (Header) -->
-    <header class="glass border-b border-slate-100 dark:border-slate-800/80 py-4 px-5 flex justify-between items-center sticky top-0 z-10 shadow-sm w-full">
-      <div class="flex items-center space-x-3 space-x-reverse">
-        <button onclick="switchPage('workTrackerPage')" class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition active:scale-95">
-          <svg class="w-6 h-6 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+<div id="page-register" class="page page-hidden-state hidden">
+  <div class="min-h-full flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+    <div class="absolute -top-24 -left-24 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-amber-500/20 rounded-full blur-3xl"></div>
+
+    <div class="w-full max-w-sm relative z-10 animate-fadeInUp">
+      <div class="flex flex-col items-center mb-8">
+        <h1 class="font-display font-extrabold text-2xl">حساب جديد</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">أنشئ حسابك لبدء متابعة عمالك</p>
+      </div>
+
+      <form id="form-register" class="glass-strong rounded-3xl p-6 shadow-2xl shadow-slate-900/5 flex flex-col gap-4">
+        <div id="register-error" class="hidden text-rose-500 bg-rose-500/10 border border-rose-500/20 text-sm rounded-xl px-4 py-2.5"></div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block">الاسم الكامل</label>
+          <input required id="register-name" type="text" placeholder="مثال: محمد العلوي" class="input-field">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block">رقم الهاتف</label>
+          <input required id="register-phone" type="tel" inputmode="numeric" dir="ltr" placeholder="0600000000" class="input-field text-left">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block">كلمة المرور</label>
+          <input required id="register-password" type="password" dir="ltr" placeholder="6 أحرف على الأقل" class="input-field text-left">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block">تأكيد كلمة المرور</label>
+          <input required id="register-password2" type="password" dir="ltr" placeholder="أعد كتابة كلمة المرور" class="input-field text-left">
+        </div>
+
+        <button id="register-submit" type="submit" class="btn-press w-full bg-slate-900 dark:bg-amber-500 hover:bg-slate-800 dark:hover:bg-amber-400 text-white dark:text-slate-900 font-display font-bold py-3.5 rounded-2xl mt-2 shadow-lg shadow-slate-900/10">
+          إنشاء الحساب
         </button>
-        <h1 id="selectedWorkerName" class="text-xl font-black text-slate-800 dark:text-white">سجل الحسابات</h1>
-      </div>
-      
-      <!-- إظهار الطوطال ديال لفلوس + طوطال ديال أيام العمل الفوق -->
-      <div class="flex flex-col items-end gap-1.5">
-        <div class="bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-xl text-xs font-black border border-blue-500/15">
-          المصروف: <span id="totalDebt">0</span> DH
-        </div>
-        <div class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-xl text-xs font-black border border-emerald-500/15">
-          العمل: <span id="totalDays">0</span> يوم
-        </div>
-      </div>
-    </header>
 
-    <!-- سجل الأيام -->
-    <main class="flex-1 p-5 max-w-md mx-auto w-full space-y-4 overflow-y-auto">
-      <div id="logsList" class="space-y-3.5">
-        <!-- السجلات غتبان هنا -->
-      </div>
-    </main>
-
-    <!-- أزرار العودة السفلية -->
-    <footer class="glass border-t border-slate-100 dark:border-slate-800/80 p-4 max-w-md mx-auto w-full flex space-x-4 space-x-reverse sticky bottom-0">
-      <button onclick="switchPage('mainPage')" class="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-center shadow-lg transition btn-press">
-        العودة للرئيسية
-      </button>
-      <button onclick="switchPage('workTrackerPage')" class="flex-1 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl text-center shadow-lg transition btn-press">
-        إضافة عمل
-      </button>
-    </footer>
+        <p class="text-center text-sm text-slate-500 dark:text-slate-400">
+          لديك حساب بالفعل؟
+          <button type="button" data-nav="page-login" class="text-amber-600 dark:text-amber-400 font-bold">تسجيل الدخول</button>
+        </p>
+      </form>
+    </div>
   </div>
+</div>
 
-  <!-- ==================== 🛠️ الجزء البرمجي (Firebase SDK) ==================== -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc, orderBy, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<div id="page-main" class="page page-hidden-state hidden">
+  <div class="min-h-full pb-28">
+    <div class="sticky top-0 z-20 glass-strong">
+      <div class="hazard-stripe h-1"></div>
+      <div class="px-5 pt-4 pb-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">أهلاً بك</p>
+          <h1 id="main-user-name" class="font-display font-extrabold text-lg">-</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="theme-toggle" class="btn-press w-11 h-11 rounded-2xl glass flex items-center justify-center">
+            <svg id="theme-icon-sun" class="w-5 h-5 text-amber-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
+            <svg id="theme-icon-moon" class="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 008.998-5.998z"/></svg>
+          </button>
+          <button id="logout-btn" class="btn-press w-11 h-11 rounded-2xl glass flex items-center justify-center text-rose-500">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0110.5 3h6a2.25 2.25 0 012.25 2.25v13.5A2.25 2.25 0 0116.5 21h-6a2.25 2.25 0 01-2.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="px-5 pb-4 flex items-center gap-3">
+        <div class="relative flex-1">
+          <svg class="w-5 h-5 text-slate-400 absolute top-1/2 -translate-y-1/2 right-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+          <input id="worker-search" type="text" placeholder="ابحث عن عامل..." class="input-field pr-11">
+        </div>
+        <button id="open-add-worker" class="btn-press bg-amber-500 hover:bg-amber-400 text-slate-900 font-display font-bold px-5 py-3 rounded-2xl flex items-center gap-1.5 shadow-lg shadow-amber-500/25 shrink-0">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          <span>إضافة</span>
+        </button>
+      </div>
+    </div>
 
-    // كود الـ Config ديال Firebase
-    const firebaseConfig = {
+    <div class="px-5 pt-5">
+      <div id="workers-loading" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="skeleton h-24 rounded-2xl"></div>
+        <div class="skeleton h-24 rounded-2xl"></div>
+        <div class="skeleton h-24 rounded-2xl"></div>
+      </div>
+      <div id="workers-empty" class="hidden flex-col items-center justify-center text-center py-20">
+        <div class="w-20 h-20 rounded-3xl glass flex items-center justify-center mb-4">
+          <svg class="w-9 h-9 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.649m0 0a3.375 3.375 0 10-6-2.7m6 2.7a9.099 9.099 0 01-4.5.9 9.093 9.093 0 01-6.542-2.766m0 0a5.986 5.986 0 013.786-3.9m-3.786 3.9a5.998 5.998 0 01-1.5-3.906m-.011-2.35a7.5 7.5 0 0114.85-1.25M12 6.375a3.375 3.375 0 100 6.75 3.375 3.375 0 000-6.75z"/></svg>
+        </div>
+        <p class="font-display font-bold text-slate-500 dark:text-slate-400">لا يوجد عمال بعد</p>
+        <p class="text-sm text-slate-400 dark:text-slate-500 mt-1">اضغط على زر "إضافة" لتسجيل أول عامل</p>
+      </div>
+      <div id="workers-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+    </div>
+  </div>
+</div>
+
+<div id="page-tracker" class="page page-hidden-state hidden">
+  <div class="min-h-full pb-16">
+    <div class="glass-strong sticky top-0 z-20">
+      <div class="hazard-stripe h-1"></div>
+      <div class="px-5 pt-4 pb-4 flex items-center gap-3">
+        <button data-nav="page-details" class="btn-press w-10 h-10 rounded-xl glass flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+        </button>
+        <div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">تسجيل يوم عمل</p>
+          <h2 id="tracker-worker-name" class="font-display font-extrabold text-lg">-</h2>
+        </div>
+      </div>
+    </div>
+
+    <form id="form-tracker" class="px-5 pt-6 flex flex-col gap-5 max-w-lg mx-auto animate-fadeInUp">
+      <div class="glass rounded-2xl p-5 flex items-center justify-between">
+        <div>
+          <p class="font-bold">هل اشتغل العامل؟</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">فعّل السويتش إذا اشتغل في هذا اليوم</p>
+        </div>
+        <div id="tracker-worked-switch" class="switch on"><div class="switch-dot"></div></div>
+      </div>
+
+      <div>
+        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block">التاريخ</label>
+        <input required id="tracker-date" type="date" dir="ltr" class="input-field text-left num">
+      </div>
+
+      <div>
+        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block">المصروف (درهم)</label>
+        <input required id="tracker-expense" type="number" step="0.01" min="0" dir="ltr" placeholder="0.00" class="input-field text-left num">
+      </div>
+
+      <button type="submit" class="btn-press w-full bg-slate-900 dark:bg-amber-500 hover:bg-slate-800 dark:hover:bg-amber-400 text-white dark:text-slate-900 font-display font-bold py-3.5 rounded-2xl shadow-lg shadow-slate-900/10">
+        حفظ السجل
+      </button>
+    </form>
+  </div>
+</div>
+
+<div id="page-details" class="page page-hidden-state hidden">
+  <div class="min-h-full pb-16">
+    <div class="glass-strong sticky top-0 z-20">
+      <div class="hazard-stripe h-1"></div>
+      <div class="px-5 pt-4 pb-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <button data-nav="page-main" class="btn-press w-10 h-10 rounded-xl glass flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+          </button>
+          <div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">سجل الحساب</p>
+            <h2 id="details-worker-name" class="font-display font-extrabold text-lg">-</h2>
+          </div>
+        </div>
+        <button id="delete-worker-btn" class="btn-press w-10 h-10 rounded-xl glass flex items-center justify-center text-rose-500">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="px-5 pt-6 max-w-2xl mx-auto">
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="glass rounded-2xl p-5 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-1.5 h-full bg-amber-500"></div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">إجمالي المصروف</p>
+          <p id="details-total-expense" class="num font-display font-extrabold text-2xl">0.00</p>
+          <p class="text-xs text-slate-400 mt-0.5">درهم</p>
+        </div>
+        <div class="glass rounded-2xl p-5 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-1.5 h-full bg-teal-500"></div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">أيام العمل</p>
+          <p id="details-total-days" class="num font-display font-extrabold text-2xl">0</p>
+          <p class="text-xs text-slate-400 mt-0.5">يوم</p>
+        </div>
+      </div>
+
+      <button id="open-tracker-btn" class="btn-press w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-display font-bold py-3.5 rounded-2xl mb-6 flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        <span>تسجيل يوم عمل جديد</span>
+      </button>
+
+      <div id="records-loading" class="flex flex-col gap-3">
+        <div class="skeleton h-14 rounded-2xl"></div>
+        <div class="skeleton h-14 rounded-2xl"></div>
+        <div class="skeleton h-14 rounded-2xl"></div>
+      </div>
+
+      <div id="records-empty" class="hidden flex-col items-center justify-center text-center py-16">
+        <p class="font-display font-bold text-slate-500 dark:text-slate-400">لا توجد سجلات بعد</p>
+        <p class="text-sm text-slate-400 dark:text-slate-500 mt-1">ابدأ بتسجيل أول يوم عمل لهذا العامل</p>
+      </div>
+
+      <div id="records-table-wrap" class="hidden overflow-x-auto">
+        <table class="ledger">
+          <thead>
+            <tr class="text-xs text-slate-500 dark:text-slate-400">
+              <td class="!bg-transparent px-3 font-bold">التاريخ</td>
+              <td class="!bg-transparent px-3 font-bold">الحالة</td>
+              <td class="!bg-transparent px-3 font-bold">المصروف</td>
+              <td class="!bg-transparent px-3 font-bold"></td>
+            </tr>
+          </thead>
+          <tbody id="records-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-add-worker" class="fixed inset-0 z-40 hidden items-center justify-center px-6 modal-overlay">
+  <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" data-close-modal="modal-add-worker"></div>
+  <div class="relative w-full max-w-sm glass-strong rounded-3xl p-6 shadow-2xl animate-popIn">
+    <h3 class="font-display font-extrabold text-lg mb-4">إضافة عامل جديد</h3>
+    <form id="form-add-worker" class="flex flex-col gap-4">
+      <div>
+        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block">اسم العامل</label>
+        <input required id="worker-name-input" type="text" placeholder="مثال: يوسف بنعلي" class="input-field">
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block">المهنة (اختياري)</label>
+        <input id="worker-job-input" type="text" placeholder="مثال: نجار، بناء..." class="input-field">
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block">رقم الهاتف (اختياري)</label>
+        <input id="worker-phone-input" type="tel" dir="ltr" inputmode="numeric" placeholder="0600000000" class="input-field text-left">
+      </div>
+      <div class="flex gap-3 mt-2">
+        <button type="button" data-close-modal="modal-add-worker" class="btn-press flex-1 bg-slate-200 dark:bg-white/10 font-bold py-3 rounded-2xl">إلغاء</button>
+        <button type="submit" class="btn-press flex-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-display font-bold py-3 rounded-2xl">إضافة</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modal-confirm" class="fixed inset-0 z-50 hidden items-center justify-center px-6 modal-overlay">
+  <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
+  <div class="relative w-full max-w-sm glass-strong rounded-3xl p-6 shadow-2xl animate-popIn">
+    <div class="w-12 h-12 rounded-2xl bg-rose-500/15 text-rose-500 flex items-center justify-center mb-4">
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+    </div>
+    <h3 class="font-display font-extrabold text-lg mb-1.5">تأكيد الحذف</h3>
+    <p id="confirm-message" class="text-sm text-slate-500 dark:text-slate-400 mb-6">هل أنت متأكد من هذا الإجراء؟</p>
+    <div class="flex gap-3">
+      <button id="confirm-no" class="btn-press flex-1 bg-slate-200 dark:bg-white/10 font-bold py-3 rounded-2xl">إلغاء</button>
+      <button id="confirm-yes" class="btn-press flex-1 bg-rose-500 hover:bg-rose-400 text-white font-bold py-3 rounded-2xl">حذف</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-2 items-center w-full px-6 pointer-events-none"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+(function setupPwa() {
+  var iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="%230B1220"/><circle cx="96" cy="70" r="30" fill="%23F59E0B"/><path d="M40 160c0-40 25-64 56-64s56 24 56 64" fill="%23F59E0B"/></svg>';
+  var iconDataUri = 'data:image/svg+xml;utf8,' + iconSvg;
+  document.getElementById('apple-touch-icon').setAttribute('href', iconDataUri);
+  document.getElementById('favicon-icon').setAttribute('href', iconDataUri);
+
+  var manifestData = {
+    name: 'متابعة العمال - Worker Tracker',
+    short_name: 'العمال',
+    description: 'نظام إدارة العمال وحساباتهم اليومية',
+    start_url: '.',
+    scope: '.',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#0B1220',
+    theme_color: '#0B1220',
+    dir: 'rtl',
+    lang: 'ar',
+    icons: [
+      { src: iconDataUri, sizes: '192x192', type: 'image/svg+xml', purpose: 'any' },
+      { src: iconDataUri, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' }
+    ]
+  };
+  var manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+  document.getElementById('manifest-link').setAttribute('href', URL.createObjectURL(manifestBlob));
+
+  var swSource = [
+    "const CACHE_NAME = 'worker-tracker-cache-v1';",
+    "self.addEventListener('install', function(event) { self.skipWaiting(); });",
+    "self.addEventListener('activate', function(event) { event.waitUntil(self.clients.claim()); });",
+    "self.addEventListener('fetch', function(event) {",
+    "  if (event.request.method !== 'GET') return;",
+    "  event.respondWith(",
+    "    fetch(event.request).then(function(response) {",
+    "      var copy = response.clone();",
+    "      caches.open(CACHE_NAME).then(function(cache) { cache.put(event.request, copy); });",
+    "      return response;",
+    "    }).catch(function() {",
+    "      return caches.match(event.request).then(function(cached) { return cached || caches.match('.'); });",
+    "    })",
+    "  );",
+    "});"
+  ].join('\n');
+  if ('serviceWorker' in navigator) {
+    var swBlob = new Blob([swSource], { type: 'application/javascript' });
+    var swUrl = URL.createObjectURL(swBlob);
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register(swUrl).catch(function (err) {
+        console.warn('Service worker registration failed:', err);
+      });
+    });
+  }
+})();
+</script>
+
+<script>
+(function app() {
+  'use strict';
+
+  var firebaseConfig = {
     apiKey: "AIzaSyBU-gtVFbI7QEGsZxnESkShv4DlV81o3NQ",
     authDomain: "workerapp-30908.firebaseapp.com",
     projectId: "workerapp-30908",
     storageBucket: "workerapp-30908.firebasestorage.app",
     messagingSenderId: "211170585199",
     appId: "1:211170585199:web:c96dd78e16a914c5a5fb9a"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth();
+  var db = firebase.firestore();
+
+  db.enablePersistence({ synchronizeTabs: true }).catch(function (err) {
+    console.warn('Offline persistence not enabled:', err.code);
+  });
+
+  var $ = function (sel, parent) { return (parent || document).querySelector(sel); };
+  var $$ = function (sel, parent) { return Array.prototype.slice.call((parent || document).querySelectorAll(sel)); };
+
+  var state = {
+    user: null,
+    userName: '',
+    workers: [],
+    workersUnsub: null,
+    currentWorkerId: null,
+    currentWorkerName: null,
+    records: [],
+    recordsUnsub: null,
+    workedToggle: true
+  };
+
+  function phoneToEmail(phone) {
+    var digits = String(phone).replace(/\D/g, '');
+    return digits + '@workerapp-users.local';
+  }
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function formatDateWestern(input) {
+    var d = (input instanceof Date) ? input : new Date(input + 'T00:00:00');
+    if (isNaN(d.getTime())) return '-';
+    return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear();
+  }
+
+  function toInputDateValue(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+
+  function formatMoney(n) {
+    var num = Number(n) || 0;
+    return num.toFixed(2);
+  }
+
+  function toast(message, type) {
+    type = type || 'info';
+    var colors = {
+      success: 'bg-teal-500 text-white',
+      error: 'bg-rose-500 text-white',
+      info: 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
     };
+    var el = document.createElement('div');
+    el.className = 'toast-item pointer-events-auto px-5 py-3 rounded-2xl shadow-2xl font-bold text-sm max-w-sm text-center ' + (colors[type] || colors.info);
+    el.textContent = message;
+    $('#toast-container').appendChild(el);
+    setTimeout(function () {
+      el.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(10px)';
+      setTimeout(function () { el.remove(); }, 320);
+    }, 2800);
+  }
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  var confirmResolver = null;
+  function showConfirm(message) {
+    $('#confirm-message').textContent = message;
+    var modal = $('#modal-confirm');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    return new Promise(function (resolve) { confirmResolver = resolve; });
+  }
+  function closeConfirm(result) {
+    var modal = $('#modal-confirm');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    if (confirmResolver) { confirmResolver(result); confirmResolver = null; }
+  }
+  $('#confirm-yes').addEventListener('click', function () { closeConfirm(true); });
+  $('#confirm-no').addEventListener('click', function () { closeConfirm(false); });
 
-    try {
-      enableIndexedDbPersistence(db);
-    } catch (err) {
-      console.warn("تنبيه: تعذر تفعيل الـ Persistence.");
-    }
-
-    let currentUser = null;
-    let selectedWorkerId = null;
-    let selectedWorkerNameStr = "";
-
-    // نظام التنبيهات العصرية (Toasts)
-    window.showToast = function(message, type = 'success') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      const bgClass = type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-rose-500' : 'bg-blue-500';
-      
-      toast.className = `${bgClass} text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center justify-between transition-all duration-300 transform translate-y-3 opacity-0 text-sm font-bold border border-white/10`;
-      toast.innerHTML = `
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()" class="ml-3 font-bold text-white/80 hover:text-white text-lg">×</button>
-      `;
-      
-      container.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.classList.remove('translate-y-3', 'opacity-0');
-      }, 50);
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-[-10px]');
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-
-    // تفعيل / إيقاف الـ Dark Mode
-    window.toggleDarkMode = function() {
-      if (document.documentElement.classList.contains('dark')) {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
+  function showPage(id) {
+    $$('.page').forEach(function (el) {
+      el.classList.remove('hidden');
+      if (el.id === id) {
+        el.classList.remove('page-hidden-state');
+        el.classList.add('page-visible-state');
+        el.scrollTop = 0;
       } else {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
+        el.classList.remove('page-visible-state');
+        el.classList.add('page-hidden-state');
       }
-    }
+    });
+    setTimeout(function () {
+      $$('.page').forEach(function (el) {
+        if (el.id !== id) el.classList.add('hidden');
+      });
+    }, 340);
+  }
 
-    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
+  $$('[data-nav]').forEach(function (btn) {
+    btn.addEventListener('click', function () { showPage(btn.getAttribute('data-nav')); });
+  });
+
+  $$('[data-toggle-pass]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var input = document.getElementById(btn.getAttribute('data-toggle-pass'));
+      input.type = input.type === 'password' ? 'text' : 'password';
+    });
+  });
+
+  function initTheme() {
+    var saved = localStorage.getItem('wt-theme');
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var isDark = saved ? saved === 'dark' : prefersDark;
+    applyTheme(isDark);
+  }
+  function applyTheme(isDark) {
+    var html = document.getElementById('html-root');
+    if (isDark) {
+      html.classList.add('dark');
+      $('#theme-icon-sun').classList.remove('hidden');
+      $('#theme-icon-moon').classList.add('hidden');
+      $('#theme-color-meta').setAttribute('content', '#070B14');
     } else {
-      document.documentElement.classList.remove('dark');
+      html.classList.remove('dark');
+      $('#theme-icon-sun').classList.add('hidden');
+      $('#theme-icon-moon').classList.remove('hidden');
+      $('#theme-color-meta').setAttribute('content', '#F4F6FB');
     }
+    localStorage.setItem('wt-theme', isDark ? 'dark' : 'light');
+  }
+  $('#theme-toggle').addEventListener('click', function () {
+    applyTheme(!document.getElementById('html-root').classList.contains('dark'));
+  });
+  initTheme();
 
-    // إصلاح كامل لمشكلة التنقل والاختفاء المفاجئ
-    window.switchPage = function(pageId) {
-      document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-        page.style.display = 'none'; // سريعة وحاسمة لمنع التداخل
-      });
-      const targetPage = document.getElementById(pageId);
-      if (targetPage) {
-        targetPage.style.display = 'flex';
-        // إضافة الكلاس بعد لحظة قصيرة لتشغيل الـ Animation بسلاسة
-        setTimeout(() => {
-          targetPage.classList.add('active');
-        }, 20);
-      }
-    }
+  function setError(elId, message) {
+    var el = document.getElementById(elId);
+    if (!message) { el.classList.add('hidden'); el.textContent = ''; return; }
+    el.textContent = message;
+    el.classList.remove('hidden');
+  }
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        switchPage('mainPage');
-        listenToWorkers();
-      } else {
-        currentUser = null;
-        switchPage('loginPage');
-      }
-    });
+  function friendlyAuthError(err) {
+    var map = {
+      'auth/user-not-found': 'رقم الهاتف غير مسجل، تحقق من الرقم أو أنشئ حساباً جديداً.',
+      'auth/wrong-password': 'كلمة المرور غير صحيحة.',
+      'auth/invalid-credential': 'رقم الهاتف أو كلمة المرور غير صحيحة.',
+      'auth/invalid-email': 'رقم الهاتف غير صالح.',
+      'auth/email-already-in-use': 'رقم الهاتف مسجل مسبقاً، جرّب تسجيل الدخول.',
+      'auth/weak-password': 'كلمة المرور ضعيفة جداً، استعمل 6 أحرف على الأقل.',
+      'auth/network-request-failed': 'تحقق من اتصالك بالإنترنت وحاول مجدداً.',
+      'auth/too-many-requests': 'محاولات كثيرة، حاول لاحقاً.'
+    };
+    return map[err.code] || 'حدث خطأ غير متوقع، حاول مجدداً.';
+  }
 
-    // تسجيل دخول
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const phone = document.getElementById('loginPhone').value.trim();
-      const rawPassword = document.getElementById('loginPassword').value;
-      
-      const email = `${phone}@app.com`;
-      const securePassword = `${rawPassword}_super_secret_suffix`;
+  $('#form-login').addEventListener('submit', function (e) {
+    e.preventDefault();
+    setError('login-error', '');
+    var phone = $('#login-phone').value.trim();
+    var password = $('#login-password').value;
+    if (!phone || !password) { setError('login-error', 'يرجى ملء جميع الحقول.'); return; }
+    var btn = $('#login-submit');
+    btn.disabled = true; btn.classList.add('opacity-60');
+    auth.signInWithEmailAndPassword(phoneToEmail(phone), password)
+      .catch(function (err) { setError('login-error', friendlyAuthError(err)); })
+      .finally(function () { btn.disabled = false; btn.classList.remove('opacity-60'); });
+  });
 
-      try {
-        await signInWithEmailAndPassword(auth, email, securePassword);
-        showToast("مرحباً بك من جديد! تم تسجيل الدخول.", "success");
-      } catch (error) {
-        showToast("خطأ! تأكد من رقم الهاتف والكود ديالك.", "error");
-      }
-    });
+  $('#form-register').addEventListener('submit', function (e) {
+    e.preventDefault();
+    setError('register-error', '');
+    var name = $('#register-name').value.trim();
+    var phone = $('#register-phone').value.trim();
+    var password = $('#register-password').value;
+    var password2 = $('#register-password2').value;
 
-    // حساب جديد
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const phone = document.getElementById('registerPhone').value.trim();
-      const rawPassword = document.getElementById('registerPassword').value;
-      
-      const email = `${phone}@app.com`;
-      const securePassword = `${rawPassword}_super_secret_suffix`;
+    if (!name || !phone || !password || !password2) { setError('register-error', 'يرجى ملء جميع الحقول.'); return; }
+    if (phone.replace(/\D/g, '').length < 6) { setError('register-error', 'رقم الهاتف غير صالح.'); return; }
+    if (password.length < 6) { setError('register-error', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.'); return; }
+    if (password !== password2) { setError('register-error', 'كلمتا المرور غير متطابقتين.'); return; }
 
-      try {
-        await createUserWithEmailAndPassword(auth, email, securePassword);
-        showToast("تم إنشاء الحساب ديالك بنجاح!", "success");
-      } catch (error) {
-        showToast("تعذر إنشاء الحساب! يقدر يكون هاد الرقم ديجا مسجل.", "error");
-      }
-    });
-
-    window.logout = function() {
-      signOut(auth);
-      showToast("تم تسجيل الخروج بنجاح.", "info");
-    }
-
-    document.getElementById('addWorkerForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('workerNameInput').value.trim();
-      if (!name || !currentUser) return;
-
-      try {
-        await addDoc(collection(db, "workers"), {
-          name: name,
-          ownerId: currentUser.uid,
-          createdAt: new Date()
-        });
-        document.getElementById('workerNameInput').value = "";
-        showToast("تمت إضافة العامل بنجاح!", "success");
-      } catch (error) {
-        showToast("وقع خطأ فاش بغينا نزيدو الخدام.", "error");
-      }
-    });
-
-    function listenToWorkers() {
-      const q = query(collection(db, "workers"), where("ownerId", "==", currentUser.uid));
-      onSnapshot(q, (snapshot) => {
-        const workersList = document.getElementById('workersList');
-        workersList.innerHTML = "";
-        
-        if (snapshot.empty) {
-          workersList.innerHTML = `<p class="text-slate-400 dark:text-slate-500 text-center py-8 font-bold">ما كاين حتى شي خدام دابا. زيد أول خدام من التحت!</p>`;
-          return;
-        }
-
-        snapshot.forEach((docSnapshot) => {
-          const worker = docSnapshot.data();
-          const workerId = docSnapshot.id;
-          
-          const workerCard = document.createElement('div');
-          workerCard.className = "flex items-center justify-between bg-white dark:bg-slate-800/80 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/50 hover:shadow-md transition duration-300 cursor-pointer active:scale-[0.98]";
-          workerCard.innerHTML = `
-            <div class="flex items-center space-x-3 space-x-reverse flex-1" onclick="openWorkTracker('${workerId}', '${worker.name}')">
-              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-blue-500/20">
-                ${worker.name.charAt(0).toUpperCase()}
-              </div>
-              <span class="text-slate-800 dark:text-slate-100 font-bold text-lg">${worker.name}</span>
-            </div>
-            <button onclick="event.stopPropagation(); deleteWorker('${workerId}')" class="text-slate-400 hover:text-rose-500 p-2.5 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl transition">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            </button>
-          `;
-          workersList.appendChild(workerCard);
-        });
-      });
-    }
-
-    window.deleteWorker = async function(workerId) {
-      if (confirm("واش متأكد بغيتي تمسح هاد الخدام وباع حساباتو؟")) {
-        try {
-          await deleteDoc(doc(db, "workers", workerId));
-          showToast("تم مسح العامل بنجاح.", "info");
-        } catch (err) {
-          showToast("خطأ فالمسح.", "error");
-        }
-      }
-    }
-
-    window.openWorkTracker = function(workerId, workerName) {
-      selectedWorkerId = workerId;
-      selectedWorkerNameStr = workerName;
-      document.getElementById('workerNameDisplay').innerText = workerName;
-      
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('logDate').value = today;
-      
-      document.getElementById('logExpense').value = "";
-      document.getElementById('logStatus').checked = false;
-      
-      switchPage('workTrackerPage');
-    }
-
-    document.getElementById('addLogForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const expense = parseFloat(document.getElementById('logExpense').value) || 0;
-      const isWorked = document.getElementById('logStatus').checked;
-      const status = isWorked ? "اشتغل" : "لم يشتغل";
-      const selectedDateString = document.getElementById('logDate').value;
-
-      if (!selectedWorkerId || !selectedDateString) return;
-
-      try {
-        const selectedDate = new Date(selectedDateString);
-        
-        // تعديل التاريخ ليكون بأرقام غربية عادية 123 ومقروءة بشكل عصري
-        const dayName = selectedDate.toLocaleDateString('ar-MA', { weekday: 'long' });
-        const dayNumber = selectedDate.getDate();
-        const monthNumber = selectedDate.getMonth() + 1;
-        const yearNumber = selectedDate.getFullYear();
-        const formattedDate = `${dayName} - ${dayNumber}/${monthNumber}/${yearNumber}`;
-
-        await addDoc(collection(db, "logs"), {
-          workerId: selectedWorkerId,
-          expense: expense,
-          status: status,
-          dateString: selectedDateString,
-          dateFormatted: formattedDate,
-          timestamp: selectedDate
-        });
-        showToast("تم حفظ اليومية بنجاح!", "success");
-        document.getElementById('logExpense').value = "";
-        document.getElementById('logStatus').checked = false;
-      } catch (error) {
-        showToast("فشل تسجيل اليومية.", "error");
-      }
-    });
-
-    let unsubscribeLogs = null;
-    window.openWorkerDetails = function() {
-      if (!selectedWorkerId) return;
-      document.getElementById('selectedWorkerName').innerText = selectedWorkerNameStr;
-      switchPage('detailsPage');
-      listenToLogs(selectedWorkerId);
-    }
-
-    function listenToLogs(workerId) {
-      if (unsubscribeLogs) unsubscribeLogs();
-
-      const q = query(collection(db, "logs"), where("workerId", "==", workerId), orderBy("timestamp", "desc"));
-      
-      unsubscribeLogs = onSnapshot(q, (snapshot) => {
-        const logsList = document.getElementById('logsList');
-        logsList.innerHTML = "";
-        let totalDebt = 0;
-        let activeDaysCount = 0;
-
-        if (snapshot.empty) {
-          logsList.innerHTML = `<p class="text-slate-400 dark:text-slate-500 text-center py-8 font-bold">ما كاين حتى شي حساب مسجل.</p>`;
-          document.getElementById('totalDebt').innerText = "0";
-          document.getElementById('totalDays').innerText = "0";
-          return;
-        }
-
-        snapshot.forEach((docSnapshot) => {
-          const log = docSnapshot.data();
-          const logId = docSnapshot.id;
-          totalDebt += log.expense;
-
-          const isWorked = log.status === "اشتغل";
-          if (isWorked) activeDaysCount++;
-          const statusBg = isWorked ? 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400';
-
-          const logCard = document.createElement('div');
-          logCard.className = "bg-white dark:bg-slate-850 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex justify-between items-center transition duration-200 hover:shadow";
-          logCard.innerHTML = `
-            <div class="space-y-1">
-              <span class="text-xs text-slate-400 dark:text-slate-500 block font-medium">${log.dateFormatted}</span>
-              <span class="font-extrabold text-slate-800 dark:text-slate-100 text-lg">${log.expense} DH</span>
-            </div>
-            <div class="flex items-center space-x-2 space-x-reverse">
-              <span class="px-3.5 py-1.5 rounded-xl text-xs font-black ${statusBg}">${log.status}</span>
-              <button onclick="deleteLog('${logId}')" class="text-slate-400 hover:text-rose-500 p-2 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl transition">
-                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              </button>
-            </div>
-          `;
-          logsList.appendChild(logCard);
-        });
-
-        document.getElementById('totalDebt').innerText = totalDebt;
-        document.getElementById('totalDays').innerText = activeDaysCount;
-      });
-    }
-
-    // تعديل المسح ليكون فوري ومباشر
-    window.deleteLog = async function(logId) {
-      if (confirm("واش متأكد بغيتي تمسح هاد السجل؟")) {
-        try {
-          await deleteDoc(doc(db, "logs", logId));
-          showToast("تم مسح السجل بنجاح.", "info");
-        } catch (error) {
-          showToast("حدث خطأ أثناء محاولة المسح.", "error");
-        }
-      }
-    }
-
-    // الـ Service Worker لـ PWA
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('PWA Service Worker Active.'))
-        .catch(err => console.error('PWA Registration failed:', err));
-    }
-
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-
-    function updateOnlineStatus() {
-      const alertDiv = document.getElementById('offlineAlert');
-      if (navigator.onLine) {
-        alertDiv.classList.add('hidden');
-      } else {
-        alertDiv.classList.remove('hidden');
-      }
-    }
-    updateOnlineStatus();
-
-    // الإشعارات
-    window.requestNotificationPermission = function() {
-      if (!('Notification' in window)) {
-        showToast('المتصفح لا يدعم التنبيهات.', 'error');
-        return;
-      }
-
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          showToast('✅ تم تفعيل الإشعارات بنجاح!', 'success');
-          showWelcomeNotification();
-        } else {
-          showToast('❌ تم رفض صلاحية الإشعارات.', 'error');
-        }
-      });
-    }
-
-    function showWelcomeNotification() {
-      if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.ready.then(reg => {
-          reg.showNotification('إدارة العمال والحسابات', {
-            body: 'تم تفعيل التنبيهات بنجاح.',
-            icon: 'https://cdn-icons-png.flaticon.com/512/3204/3204368.png',
-            vibrate: [200, 100, 200]
+    var btn = $('#register-submit');
+    btn.disabled = true; btn.classList.add('opacity-60');
+    auth.createUserWithEmailAndPassword(phoneToEmail(phone), password)
+      .then(function (cred) {
+        return cred.user.updateProfile({ displayName: name }).then(function () {
+          return db.collection('users').doc(cred.user.uid).set({
+            name: name,
+            phone: phone,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         });
-      }
+      })
+      .catch(function (err) { setError('register-error', friendlyAuthError(err)); })
+      .finally(function () { btn.disabled = false; btn.classList.remove('opacity-60'); });
+  });
+
+  $('#logout-btn').addEventListener('click', function () {
+    showConfirm('هل تريد تسجيل الخروج من حسابك؟').then(function (ok) {
+      if (ok) auth.signOut();
+    });
+  });
+
+  function detachAllListeners() {
+    if (state.workersUnsub) { state.workersUnsub(); state.workersUnsub = null; }
+    if (state.recordsUnsub) { state.recordsUnsub(); state.recordsUnsub = null; }
+  }
+
+  auth.onAuthStateChanged(function (user) {
+    $('#page-loading').classList.add('hidden');
+    if (user) {
+      state.user = user;
+      state.userName = user.displayName || 'مستخدم';
+      $('#main-user-name').textContent = state.userName;
+      showPage('page-main');
+      listenWorkers();
+    } else {
+      detachAllListeners();
+      state.user = null;
+      state.workers = [];
+      $('#form-login').reset();
+      $('#form-register').reset();
+      setError('login-error', '');
+      setError('register-error', '');
+      showPage('page-login');
     }
-  </script>
+  });
+
+  function listenWorkers() {
+    if (state.workersUnsub) state.workersUnsub();
+    $('#workers-loading').classList.remove('hidden');
+    state.workersUnsub = db.collection('workers')
+      .where('ownerId', '==', state.user.uid)
+      .onSnapshot(function (snapshot) {
+        state.workers = snapshot.docs.map(function (doc) {
+          var data = doc.data();
+          return { id: doc.id, name: data.name, job: data.job || '', phone: data.phone || '', createdAt: data.createdAt };
+        });
+        state.workers.sort(function (a, b) {
+          var ta = a.createdAt ? a.createdAt.toMillis() : 0;
+          var tb = b.createdAt ? b.createdAt.toMillis() : 0;
+          return tb - ta;
+        });
+        $('#workers-loading').classList.add('hidden');
+        renderWorkers();
+      }, function (err) {
+        $('#workers-loading').classList.add('hidden');
+        toast('تعذر تحميل لائحة العمال.', 'error');
+        console.error(err);
+      });
+  }
+
+  function initials(name) {
+    var parts = String(name).trim().split(/\s+/);
+    var a = parts[0] ? parts[0][0] : '';
+    var b = parts[1] ? parts[1][0] : '';
+    return (a + b).toUpperCase();
+  }
+
+  function renderWorkers() {
+    var query = $('#worker-search').value.trim().toLowerCase();
+    var filtered = state.workers.filter(function (w) {
+      return !query || w.name.toLowerCase().indexOf(query) !== -1;
+    });
+
+    var listEl = $('#workers-list');
+    if (state.workers.length === 0) {
+      listEl.innerHTML = '';
+      $('#workers-empty').classList.remove('hidden');
+      $('#workers-empty').classList.add('flex');
+      return;
+    }
+    $('#workers-empty').classList.add('hidden');
+    $('#workers-empty').classList.remove('flex');
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div class="col-span-full text-center text-sm text-slate-400 py-10">لا توجد نتائج مطابقة</div>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(function (w) {
+      return '' +
+        '<button data-worker-card="' + w.id + '" class="worker-card btn-press glass rounded-2xl p-5 text-right flex items-center gap-4 hover:shadow-lg transition-shadow">' +
+          '<div class="w-12 h-12 rounded-2xl bg-slate-900 dark:bg-amber-500 text-amber-400 dark:text-slate-900 flex items-center justify-center font-display font-extrabold shrink-0">' + initials(w.name) + '</div>' +
+          '<div class="min-w-0 flex-1">' +
+            '<p class="font-display font-bold truncate">' + escapeHtml(w.name) + '</p>' +
+            '<p class="text-xs text-slate-500 dark:text-slate-400 truncate">' + (w.job ? escapeHtml(w.job) : 'بدون مهنة محددة') + '</p>' +
+          '</div>' +
+          '<svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 4.5l-7.5 7.5 7.5 7.5m8.25-15l-7.5 7.5 7.5 7.5"/></svg>' +
+        '</button>';
+    }).join('');
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  $('#worker-search').addEventListener('input', renderWorkers);
+
+  $('#workers-list').addEventListener('click', function (e) {
+    var card = e.target.closest('[data-worker-card]');
+    if (!card) return;
+    openWorkerDetails(card.getAttribute('data-worker-card'));
+  });
+
+  $('#open-add-worker').addEventListener('click', function () {
+    $('#form-add-worker').reset();
+    var modal = $('#modal-add-worker');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  });
+  $$('[data-close-modal="modal-add-worker"]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var modal = $('#modal-add-worker');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    });
+  });
+
+  $('#form-add-worker').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('#worker-name-input').value.trim();
+    var job = $('#worker-job-input').value.trim();
+    var phone = $('#worker-phone-input').value.trim();
+    if (!name) { toast('يرجى إدخال اسم العامل.', 'error'); return; }
+
+    db.collection('workers').add({
+      ownerId: state.user.uid,
+      name: name,
+      job: job,
+      phone: phone,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function () {
+      $('#modal-add-worker').classList.add('hidden');
+      $('#modal-add-worker').classList.remove('flex');
+      toast('تمت إضافة العامل بنجاح.', 'success');
+    }).catch(function (err) {
+      toast('تعذر إضافة العامل، حاول مجدداً.', 'error');
+      console.error(err);
+    });
+  });
+
+  function openWorkerDetails(workerId) {
+    var worker = state.workers.find(function (w) { return w.id === workerId; });
+    if (!worker) return;
+    state.currentWorkerId = workerId;
+    state.currentWorkerName = worker.name;
+    $('#details-worker-name').textContent = worker.name;
+    $('#tracker-worker-name').textContent = worker.name;
+    showPage('page-details');
+    listenRecords(workerId);
+  }
+
+  function listenRecords(workerId) {
+    if (state.recordsUnsub) state.recordsUnsub();
+    $('#records-loading').classList.remove('hidden');
+    $('#records-table-wrap').classList.add('hidden');
+    $('#records-empty').classList.add('hidden');
+    $('#records-empty').classList.remove('flex');
+
+    state.recordsUnsub = db.collection('workers').doc(workerId).collection('records')
+      .orderBy('date', 'desc')
+      .onSnapshot(function (snapshot) {
+        state.records = snapshot.docs.map(function (doc) {
+          var data = doc.data();
+          return { id: doc.id, date: data.date, worked: !!data.worked, expense: Number(data.expense) || 0 };
+        });
+        $('#records-loading').classList.add('hidden');
+        renderWorkerDetails();
+      }, function (err) {
+        $('#records-loading').classList.add('hidden');
+        toast('تعذر تحميل السجلات.', 'error');
+        console.error(err);
+      });
+  }
+
+  function renderWorkerDetails() {
+    var totalExpense = 0;
+    var totalDays = 0;
+    state.records.forEach(function (r) {
+      totalExpense += r.expense;
+      if (r.worked) totalDays += 1;
+    });
+    $('#details-total-expense').textContent = formatMoney(totalExpense);
+    $('#details-total-days').textContent = String(totalDays);
+
+    if (state.records.length === 0) {
+      $('#records-table-wrap').classList.add('hidden');
+      $('#records-empty').classList.remove('hidden');
+      $('#records-empty').classList.add('flex');
+      return;
+    }
+    $('#records-empty').classList.add('hidden');
+    $('#records-empty').classList.remove('flex');
+    $('#records-table-wrap').classList.remove('hidden');
+
+    $('#records-tbody').innerHTML = state.records.map(function (r) {
+      var statusBadge = r.worked
+        ? '<span class="inline-flex items-center gap-1.5 text-teal-600 dark:text-teal-400 font-bold text-xs"><span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span>اشتغل</span>'
+        : '<span class="inline-flex items-center gap-1.5 text-slate-400 font-bold text-xs"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>لم يشتغل</span>';
+      return '' +
+        '<tr>' +
+          '<td class="px-3 py-3.5"><span class="num text-sm font-semibold">' + formatDateWestern(r.date) + '</span></td>' +
+          '<td class="px-3 py-3.5">' + statusBadge + '</td>' +
+          '<td class="px-3 py-3.5"><span class="num text-sm font-bold">' + formatMoney(r.expense) + '</span> <span class="text-xs text-slate-400">د.م</span></td>' +
+          '<td class="px-3 py-3.5 text-left">' +
+            '<button data-delete-record="' + r.id + '" class="btn-press w-9 h-9 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center inline-flex">' +
+              '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9M4.772 5.79c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0c.34.052.68.107 1.022.166m-8.522-.166v-.916c0-1.18.91-2.164 2.09-2.201a51.964 51.964 0 013.32 0c1.18.037 2.09 1.022 2.09 2.201v.916m-7.5 0a48.667 48.667 0 017.5 0"/></svg>' +
+            '</button>' +
+          '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  $('#records-tbody').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-delete-record]');
+    if (!btn) return;
+    var recordId = btn.getAttribute('data-delete-record');
+    showConfirm('هل تريد حذف هذا السجل اليومي نهائياً؟').then(function (ok) {
+      if (!ok) return;
+      db.collection('workers').doc(state.currentWorkerId).collection('records').doc(recordId).delete()
+        .then(function () { toast('تم حذف السجل.', 'success'); })
+        .catch(function (err) { toast('تعذر حذف السجل.', 'error'); console.error(err); });
+    });
+  });
+
+  $('#delete-worker-btn').addEventListener('click', function () {
+    var name = state.currentWorkerName || 'هذا العامل';
+    showConfirm('سيتم حذف "' + name + '" وجميع سجلاته نهائياً. هل تريد المتابعة؟').then(function (ok) {
+      if (!ok) return;
+      var workerId = state.currentWorkerId;
+      var recordsRef = db.collection('workers').doc(workerId).collection('records');
+      recordsRef.get().then(function (snapshot) {
+        var batch = db.batch();
+        snapshot.docs.forEach(function (doc) { batch.delete(doc.ref); });
+        batch.delete(db.collection('workers').doc(workerId));
+        return batch.commit();
+      }).then(function () {
+        if (state.recordsUnsub) { state.recordsUnsub(); state.recordsUnsub = null; }
+        toast('تم حذف العامل وجميع سجلاته.', 'success');
+        showPage('page-main');
+      }).catch(function (err) {
+        toast('تعذر حذف العامل.', 'error');
+        console.error(err);
+      });
+    });
+  });
+
+  $('#open-tracker-btn').addEventListener('click', function () {
+    state.workedToggle = true;
+    $('#tracker-worked-switch').classList.add('on');
+    $('#tracker-date').value = toInputDateValue(new Date());
+    $('#tracker-expense').value = '';
+    showPage('page-tracker');
+  });
+
+  $('#tracker-worked-switch').addEventListener('click', function () {
+    state.workedToggle = !state.workedToggle;
+    this.classList.toggle('on', state.workedToggle);
+  });
+
+  $('#form-tracker').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var date = $('#tracker-date').value;
+    var expense = parseFloat($('#tracker-expense').value);
+    if (!date) { toast('يرجى اختيار التاريخ.', 'error'); return; }
+    if (isNaN(expense) || expense < 0) { toast('يرجى إدخال مصروف صحيح.', 'error'); return; }
+
+    var submitBtn = $('#form-tracker button[type="submit"]');
+    submitBtn.disabled = true; submitBtn.classList.add('opacity-60');
+
+    db.collection('workers').doc(state.currentWorkerId).collection('records').add({
+      date: date,
+      worked: state.workedToggle,
+      expense: expense,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function () {
+      toast('تم حفظ السجل بنجاح.', 'success');
+      showPage('page-details');
+    }).catch(function (err) {
+      toast('تعذر حفظ السجل، حاول مجدداً.', 'error');
+      console.error(err);
+    }).finally(function () {
+      submitBtn.disabled = false; submitBtn.classList.remove('opacity-60');
+    });
+  });
+
+})();
+</script>
 </body>
 </html>
