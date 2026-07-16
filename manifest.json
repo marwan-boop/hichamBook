@@ -1,0 +1,18 @@
+{
+  "name": "إدارة العمال والحسابات",
+  "short_name": "إدارة العمال",
+  "description": "تطبيق لتتبع عمل ومصاريف العمال يومياً",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0ea5e9",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3204/3204368.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

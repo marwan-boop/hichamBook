@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة العمال والحسابات</title>
+  
+  <!-- ربط ملف الـ Manifest للـ PWA -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0ea5e9">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <!-- خط تاجويل الأنيق للغة العربية -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS لتصميم واجهة عصرية وسريعة -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body { font-family: 'Tajawal', sans-serif; }
+    .page { display: none; }
+    .page.active { display: flex; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800">
+
+  <!-- ==================== 1. شاشة تسجيل الدخول ==================== -->
+  <div id="loginPage" class="page active min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold text-blue-600">تسجيل الدخول</h2>
+        <p class="text-gray-500 mt-2 text-sm">أدخل رقم الهاتف والكود للوصول لحسابك</p>
+      </div>
+
+      <form id="loginForm" class="space-y-5">
+        <div>
+          <label class="block text-gray-700 text-sm font-semibold mb-2">رقم الهاتف</label>
+          <input type="tel" id="loginPhone" placeholder="0612345678" required 
+                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-left" dir="ltr">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 text-sm font-semibold mb-2">كلمة المرور (الكود)</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required 
+                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-left" dir="ltr">
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition duration-200 shadow-lg shadow-blue-200">
+          دخول
+        </button>
+      </form>
+
+      <div class="mt-6 text-center text-sm">
+        <span class="text-gray-500">ليس لديك حساب؟</span>
+        <button onclick="switchPage('registerPage')" class="text-blue-600 font-bold hover:underline">إنشاء حساب جديد</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. شاشة إنشاء حساب جديد ==================== -->
+  <div id="registerPage" class="page min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold text-green-600">حساب جديد</h2>
+        <p class="text-gray-500 mt-2 text-sm">قم بإنشاء حسابك مجاناً وبسرعة</p>
+      </div>
+
+      <form id="registerForm" class="space-y-5">
+        <div>
+          <label class="block text-gray-700 text-sm font-semibold mb-2">رقم الهاتف</label>
+          <input type="tel" id="registerPhone" placeholder="0612345678" required 
+                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-left" dir="ltr">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 text-sm font-semibold mb-2">كلمة المرور (الكود)</label>
+          <input type="password" id="registerPassword" placeholder="••••••••" required 
+                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-left" dir="ltr">
+        </div>
+
+        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition duration-200 shadow-lg shadow-green-200">
+          إنشاء الحساب والولوج
+        </button>
+      </form>
+
+      <div class="mt-6 text-center text-sm">
+        <span class="text-gray-500">لديك حساب بالفعل؟</span>
+        <button onclick="switchPage('loginPage')" class="text-blue-600 font-bold hover:underline">تسجيل الدخول</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 3. الشاشة الرئيسية (لائحة العمال) ==================== -->
+  <div id="mainPage" class="page min-h-screen flex-col justify-between hidden">
+    <!-- الرأس (Header) -->
+    <header class="bg-white border-b border-gray-100 py-4 px-6 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <h1 class="text-xl font-bold text-gray-800">لائحة العمال</h1>
+        <!-- زر تفعيل الإشعارات الأنيق -->
+        <button id="notiBtn" onclick="requestNotificationPermission()" class="p-2 bg-yellow-100 hover:bg-yellow-200 rounded-lg text-yellow-700 transition" title="تفعيل الإشعارات">
+          🔔
+        </button>
+      </div>
+      <button onclick="logout()" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition">
+        خروج
+      </button>
+    </header>
+
+    <!-- قائمة العمال -->
+    <main class="flex-1 p-6 max-w-md mx-auto w-full space-y-4 overflow-y-auto">
+      <!-- تنبيه الأوفلاين (كيبان غير يلا طفت الأنترنيت) -->
+      <div id="offlineAlert" class="hidden bg-orange-100 border border-orange-200 text-orange-800 px-4 py-3 rounded-xl text-center text-sm font-bold">
+        ⚠️ أنت الآن تعمل بدون اتصال بالإنترنت. سيتم مزامنة التغييرات فور عودة الشبكة!
+      </div>
+
+      <div id="workersList" class="space-y-3">
+        <p class="text-gray-400 text-center py-8">جاري تحميل العمال...</p>
+      </div>
+    </main>
+
+    <!-- إضافة عامل جديد فـ الأسفل -->
+    <footer class="bg-white border-t border-gray-100 p-4 max-w-md mx-auto w-full sticky bottom-0">
+      <form id="addWorkerForm" class="flex items-center space-x-2 space-x-reverse">
+        <input type="text" id="workerNameInput" placeholder="اسم العامل الجديد..." required
+               class="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl transition shadow-md shadow-blue-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      </form>
+    </footer>
+  </div>
+
+  <!-- ==================== 4. شاشة إدخال البيانات اليومية (Work Tracker) ==================== -->
+  <div id="workTrackerPage" class="page min-h-screen flex-col hidden p-4 bg-[#0ea5e9]">
+    <!-- الرأس (Header) -->
+    <header class="flex items-center justify-between p-2 mb-6">
+      <button onclick="switchPage('mainPage')" class="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white shadow-md transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+      </button>
+      <div class="px-6 py-2 bg-[#fecdd3] rounded-xl shadow-md border border-[#f43f5e]/30">
+        <h1 id="workerNameDisplay" class="text-lg font-bold text-gray-800">اسم العامل</h1>
+      </div>
+      <div></div> <!-- فارغ للموازنة -->
+    </header>
+
+    <!-- القسم الأوسط مع الأيقونة ونموذج الإدخال -->
+    <main class="flex-1 flex flex-col items-center max-w-md mx-auto w-full space-y-6">
+      <!-- أيقونة الـ Work Tracker -->
+      <div class="text-center p-4 bg-white/10 rounded-2xl border border-white/20 w-48 shadow-lg">
+        <div class="text-6xl mb-2">👷‍♂️</div>
+        <h2 class="text-xl font-bold text-white uppercase tracking-wider">Work Tracker</h2>
+      </div>
+
+      <!-- نموذج إدخال البيانات -->
+      <form id="addLogForm" class="w-full space-y-4">
+        <!-- حقل العمل -->
+        <div class="flex items-center justify-between bg-[#fecdd3] p-4 rounded-xl shadow-md border border-[#f43f5e]/20">
+          <span class="text-lg font-bold text-gray-800">العمل</span>
+          <input type="checkbox" id="logStatus" class="w-6 h-6 text-rose-600 border-rose-300 rounded focus:ring-rose-500">
+        </div>
+
+        <!-- حقل المصروف -->
+        <div class="flex items-center justify-between bg-[#bbf7d0] p-4 rounded-xl shadow-md border border-[#22c55e]/20">
+          <span class="text-lg font-bold text-gray-800">المصروف :</span>
+          <input type="number" id="logExpense" placeholder="0" required
+                 class="w-32 px-2 py-1 border-b border-green-600 bg-transparent text-green-900 text-lg font-bold focus:outline-none text-center">
+        </div>
+
+        <!-- حقل التاريخ -->
+        <div class="flex items-center justify-between bg-[#ddd6fe] p-4 rounded-xl shadow-md border border-[#8b5cf6]/20">
+          <span class="text-lg font-bold text-gray-800">التاريخ :</span>
+          <div class="flex flex-col items-end">
+            <input type="date" id="logDate" class="px-2 py-1 bg-transparent text-purple-900 font-bold focus:outline-none text-center text-sm">
+            <span class="text-purple-700 text-[10px] mt-1">التاريخ تلقائي</span>
+          </div>
+        </div>
+      </form>
+    </main>
+
+    <!-- الأزرار السفلية -->
+    <footer class="mt-8 flex justify-center space-x-4 space-x-reverse max-w-md mx-auto w-full">
+        <button type="submit" form="addLogForm" class="flex-1 py-3 bg-[#eab308] hover:bg-[#ca8a04] text-yellow-950 text-xl font-bold rounded-2xl shadow-lg shadow-yellow-700/20 transition duration-200">
+            إضافة
+        </button>
+        <button type="button" onclick="openWorkerDetails()" class="flex-1 py-3 bg-[#22c55e] hover:bg-[#16a34a] text-white text-xl font-bold rounded-2xl shadow-lg shadow-green-700/20 transition duration-200">
+            جدول
+        </button>
+    </footer>
+  </div>
+
+  <!-- ==================== 5. شاشة السجل التاريخي (الجدول) ==================== -->
+  <div id="detailsPage" class="page min-h-screen flex-col justify-between hidden">
+    <!-- الرأس (Header) -->
+    <header class="bg-white border-b border-gray-100 py-4 px-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <button onclick="switchPage('workTrackerPage')" class="p-2 hover:bg-gray-100 rounded-lg transition">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </button>
+        <h1 id="selectedWorkerName" class="text-xl font-bold text-gray-800">سجل الحسابات</h1>
+      </div>
+      <div class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">
+        الحساب: <span id="totalDebt">0</span> DH
+      </div>
+    </header>
+
+    <!-- سجل الأيام -->
+    <main class="flex-1 p-4 max-w-md mx-auto w-full space-y-4 overflow-y-auto">
+      <div id="logsList" class="space-y-3">
+        <!-- السجلات غتبان هنا -->
+      </div>
+    </main>
+
+    <!-- أزرار العودة السفلية -->
+    <footer class="bg-white border-t border-gray-100 p-4 max-w-md mx-auto w-full flex space-x-4 space-x-reverse sticky bottom-0">
+      <button onclick="switchPage('mainPage')" class="flex-1 py-3 bg-[#a855f7] hover:bg-[#9333ea] text-white font-bold rounded-xl text-center shadow-lg transition">
+        العودة للرئيسية
+      </button>
+      <button onclick="switchPage('workTrackerPage')" class="flex-1 py-3 bg-[#f97316] hover:bg-[#ea580c] text-white font-bold rounded-xl text-center shadow-lg transition">
+        إضافة عمل
+      </button>
+    </footer>
+  </div>
+
+  <!-- ==================== 🛠️ الجزء البرمجي (Firebase SDK + PWA + Notification) ==================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc, orderBy, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // كود الـ Config ديال Firebase
+    const firebaseConfig = {
+    apiKey: "AIzaSyBU-gtVFbI7QEGsZxnESkShv4DlV81o3NQ",
+    authDomain: "workerapp-30908.firebaseapp.com",
+    projectId: "workerapp-30908",
+    storageBucket: "workerapp-30908.firebasestorage.app",
+    messagingSenderId: "211170585199",
+    appId: "1:211170585199:web:c96dd78e16a914c5a5fb9a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // تفعيل خاصية "العمل بلا أنترنيت" فـ Firebase ديريكت ليكون سريعا جداً
+    try {
+      enableIndexedDbPersistence(db);
+    } catch (err) {
+      console.warn("تنبيه: تعذر تفعيل الـ Persistence المحلي لـ Firestore.");
+    }
+
+    let currentUser = null;
+    let selectedWorkerId = null;
+    let selectedWorkerNameStr = "";
+
+    window.switchPage = function(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        switchPage('mainPage');
+        listenToWorkers();
+      } else {
+        currentUser = null;
+        switchPage('loginPage');
+      }
+    });
+
+    // تسجيل دخول بحيلة الكود القصير
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('loginPhone').value.trim();
+      const rawPassword = document.getElementById('loginPassword').value;
+      
+      const email = `${phone}@app.com`;
+      const securePassword = `${rawPassword}_super_secret_suffix`;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, securePassword);
+      } catch (error) {
+        alert("خطأ في تسجيل الدخول! تأكد من رقم الهاتف والكود.");
+      }
+    });
+
+    // حساب جديد بحيلة الكود القصير
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('registerPhone').value.trim();
+      const rawPassword = document.getElementById('registerPassword').value;
+      
+      const email = `${phone}@app.com`;
+      const securePassword = `${rawPassword}_super_secret_suffix`;
+
+      try {
+        await createUserWithEmailAndPassword(auth, email, securePassword);
+        alert("تم إنشاء حسابك بنجاح!");
+      } catch (error) {
+        alert("تعذر إنشاء الحساب! قد يكون الرقم مسجلاً بالفعل.");
+      }
+    });
+
+    window.logout = function() {
+      signOut(auth);
+    }
+
+    document.getElementById('addWorkerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('workerNameInput').value.trim();
+      if (!name || !currentUser) return;
+
+      try {
+        await addDoc(collection(db, "workers"), {
+          name: name,
+          ownerId: currentUser.uid,
+          createdAt: new Date()
+        });
+        document.getElementById('workerNameInput').value = "";
+      } catch (error) {
+        console.error("Error adding worker: ", error);
+      }
+    });
+
+    function listenToWorkers() {
+      const q = query(collection(db, "workers"), where("ownerId", "==", currentUser.uid));
+      onSnapshot(q, (snapshot) => {
+        const workersList = document.getElementById('workersList');
+        workersList.innerHTML = "";
+        
+        if (snapshot.empty) {
+          workersList.innerHTML = `<p class="text-gray-400 text-center py-8">لا يوجد عمال حالياً. أضف عاملك الأول في الأسفل!</p>`;
+          return;
+        }
+
+        snapshot.forEach((doc) => {
+          const worker = doc.data();
+          const workerId = doc.id;
+          
+          const workerCard = document.createElement('div');
+          workerCard.className = "flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition cursor-pointer";
+          workerCard.innerHTML = `
+            <div class="flex items-center space-x-3 space-x-reverse" onclick="openWorkTracker('${workerId}', '${worker.name}')">
+              <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                ${worker.name.charAt(0)}
+              </div>
+              <span class="text-gray-800 font-bold text-lg">${worker.name}</span>
+            </div>
+            <button onclick="deleteWorker('${workerId}')" class="text-red-400 hover:text-red-600 p-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+          `;
+          workersList.appendChild(workerCard);
+        });
+      });
+    }
+
+    window.deleteWorker = async function(workerId) {
+      if (confirm("هل أنت متأكد من حذف هذا العامل وجميع سجلاته؟")) {
+        await deleteDoc(doc(db, "workers", workerId));
+      }
+    }
+
+    window.openWorkTracker = function(workerId, workerName) {
+      selectedWorkerId = workerId;
+      selectedWorkerNameStr = workerName;
+      document.getElementById('workerNameDisplay').innerText = workerName;
+      
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('logDate').value = today;
+      
+      document.getElementById('logExpense').value = "";
+      document.getElementById('logStatus').checked = false;
+      
+      switchPage('workTrackerPage');
+    }
+
+    document.getElementById('addLogForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const expense = parseFloat(document.getElementById('logExpense').value) || 0;
+      const isWorked = document.getElementById('logStatus').checked;
+      const status = isWorked ? "اشتغل" : "لم يشتغل";
+      const selectedDateString = document.getElementById('logDate').value;
+
+      if (!selectedWorkerId || !selectedDateString) return;
+
+      try {
+        const selectedDate = new Date(selectedDateString);
+        await addDoc(collection(db, "logs"), {
+          workerId: selectedWorkerId,
+          expense: expense,
+          status: status,
+          dateString: selectedDateString,
+          dateFormatted: selectedDate.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' }),
+          timestamp: selectedDate
+        });
+        alert("تم حفظ البيانات بنجاح!");
+        document.getElementById('logExpense').value = "";
+        document.getElementById('logStatus').checked = false;
+      } catch (error) {
+        console.error("Error adding log: ", error);
+      }
+    });
+
+    let unsubscribeLogs = null;
+    window.openWorkerDetails = function() {
+      if (!selectedWorkerId) return;
+      document.getElementById('selectedWorkerName').innerText = selectedWorkerNameStr;
+      switchPage('detailsPage');
+      listenToLogs(selectedWorkerId);
+    }
+
+    function listenToLogs(workerId) {
+      if (unsubscribeLogs) unsubscribeLogs();
+
+      const q = query(collection(db, "logs"), where("workerId", "==", workerId), orderBy("timestamp", "desc"));
+      
+      unsubscribeLogs = onSnapshot(q, (snapshot) => {
+        const logsList = document.getElementById('logsList');
+        logsList.innerHTML = "";
+        let totalDebt = 0;
+
+        if (snapshot.empty) {
+          logsList.innerHTML = `<p class="text-gray-400 text-center py-8">لا توجد سجلات بعد.</p>`;
+          document.getElementById('totalDebt').innerText = "0";
+          return;
+        }
+
+        snapshot.forEach((doc) => {
+          const log = doc.data();
+          const logId = doc.id;
+          totalDebt += log.expense;
+
+          const isWorked = log.status === "اشتغل";
+          const statusBg = isWorked ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+
+          const logCard = document.createElement('div');
+          logCard.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center";
+          logCard.innerHTML = `
+            <div class="space-y-1">
+              <span class="text-xs text-gray-400 block">${log.dateFormatted}</span>
+              <span class="font-bold text-gray-700 text-lg">${log.expense} DH</span>
+            </div>
+            <div class="flex items-center space-x-2 space-x-reverse">
+              <span class="px-3 py-1 rounded-full text-xs font-bold ${statusBg}">${log.status}</span>
+              <button onclick="deleteLog('${logId}')" class="text-gray-400 hover:text-red-500 p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          `;
+          logsList.appendChild(logCard);
+        });
+
+        document.getElementById('totalDebt').innerText = totalDebt;
+      });
+    }
+
+    window.deleteLog = async function(logId) {
+      if (confirm("هل تريد حذف هذا السجل؟")) {
+        await deleteDoc(doc(db, "logs", logId));
+      }
+    }
+
+    // ==================== 🛠️ تشغيل الـ Service Worker لـ PWA ====================
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('تم تفعيل Service Worker بنجاح!'))
+        .catch(err => console.error('فشل في تسجيل الـ Service Worker:', err));
+    }
+
+    // مراقبة حالة الاتصال بالأنترنيت وعرض التنبيه
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    function updateOnlineStatus() {
+      const alertDiv = document.getElementById('offlineAlert');
+      if (navigator.onLine) {
+        alertDiv.classList.add('hidden');
+      } else {
+        alertDiv.classList.remove('hidden');
+      }
+    }
+    // فحص أولي للأنترنيت عند التشغيل
+    updateOnlineStatus();
+
+    // ==================== 🔔 منطق الإشعارات (Notifications) ====================
+    window.requestNotificationPermission = function() {
+      if (!('Notification' in window)) {
+        alert('هذا المتصفح لا يدعم نظام الإشعارات.');
+        return;
+      }
+
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          alert('✅ تم تفعيل الإشعارات بنجاح!');
+          // تجربة إشعار ترحيبي فوري
+          showWelcomeNotification();
+        } else {
+          alert('❌ تم رفض صلاحية الإشعارات.');
+        }
+      });
+    }
+
+    function showWelcomeNotification() {
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification('إدارة العمال والحسابات', {
+            body: 'مرحباً بك! تم تفعيل التنبيهات اليومية بنجاح.',
+            icon: 'https://cdn-icons-png.flaticon.com/512/3204/3204368.png',
+            vibrate: [200, 100, 200]
+          });
+        });
+      }
+    }
+  </script>
+</body>
+</html>
