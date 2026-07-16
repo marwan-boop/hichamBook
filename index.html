@@ -24,16 +24,16 @@
   <style>
     body { 
       font-family: 'Tajawal', sans-serif; 
-      transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+      transition: background-color 0.3s ease, color 0.3s ease; 
       overflow-x: hidden;
     }
     
-    /* أنيميشن الدخول والصفحات */
+    /* أنيميشن ناعمة ومضمونة بدون مشاكل الاختفاء */
     .page { 
       display: none; 
       opacity: 0;
-      transform: translateY(15px);
-      transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateY(10px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
     }
     .page.active { 
       display: flex; 
@@ -41,7 +41,7 @@
       transform: translateY(0);
     }
 
-    /* حركات ناعمة للأزرار والبطاقات */
+    /* حركات ناعمة للأزرار */
     .btn-press {
       transition: transform 0.1s ease;
     }
@@ -51,12 +51,12 @@
 
     /* Glassmorphism Effect */
     .glass {
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
     .dark .glass {
-      background: rgba(30, 41, 59, 0.7);
+      background: rgba(30, 41, 59, 0.75);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
@@ -149,7 +149,7 @@
   </div>
 
   <!-- ==================== 3. الشاشة الرئيسية (لائحة العمال) ==================== -->
-  <div id="mainPage" class="page min-h-screen flex-col justify-between hidden">
+  <div id="mainPage" class="page min-h-screen flex-col justify-between">
     <!-- الرأس (Header) -->
     <header class="glass border-b border-slate-100 dark:border-slate-800/80 py-4 px-6 flex justify-between items-center sticky top-0 z-10 shadow-sm">
       <div class="flex items-center space-x-3 space-x-reverse">
@@ -181,7 +181,7 @@
     <footer class="glass border-t border-slate-100 dark:border-slate-800/80 p-4 max-w-md mx-auto w-full sticky bottom-0">
       <form id="addWorkerForm" class="flex items-center space-x-3 space-x-reverse">
         <input type="text" id="workerNameInput" placeholder="سمية الخدام الجديد..." required
-               class="flex-1 px-4.5 py-3.5 border border-slate-200 dark:border-slate-700 dark:bg-slate-800/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner">
+               class="flex-1 px-4 py-3.5 border border-slate-200 dark:border-slate-700 dark:bg-slate-800/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner">
         <button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-6 py-3.5 rounded-2xl transition hover:shadow-lg hover:shadow-blue-500/10 active:scale-95">
           إضافة
         </button>
@@ -190,9 +190,9 @@
   </div>
 
   <!-- ==================== 4. شاشة إدخال البيانات اليومية (Work Tracker) ==================== -->
-  <div id="workTrackerPage" class="page min-h-screen flex-col hidden p-4 bg-gradient-to-b from-blue-600 to-indigo-700 dark:from-slate-900 dark:to-slate-950">
+  <div id="workTrackerPage" class="page min-h-screen flex-col p-4 bg-gradient-to-b from-blue-600 to-indigo-700 dark:from-slate-900 dark:to-slate-950">
     <!-- الرأس (Header) -->
-    <header class="flex items-center justify-between p-2 mb-6">
+    <header class="flex items-center justify-between p-2 mb-6 w-full">
       <button onclick="switchPage('mainPage')" class="p-3 bg-white/10 dark:bg-slate-800 hover:bg-white/20 rounded-2xl text-white shadow-md transition btn-press">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
       </button>
@@ -245,9 +245,9 @@
   </div>
 
   <!-- ==================== 5. شاشة السجل التاريخي (الجدول) ==================== -->
-  <div id="detailsPage" class="page min-h-screen flex-col justify-between hidden">
+  <div id="detailsPage" class="page min-h-screen flex-col justify-between">
     <!-- الرأس (Header) -->
-    <header class="glass border-b border-slate-100 dark:border-slate-800/80 py-4 px-5 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+    <header class="glass border-b border-slate-100 dark:border-slate-800/80 py-4 px-5 flex justify-between items-center sticky top-0 z-10 shadow-sm w-full">
       <div class="flex items-center space-x-3 space-x-reverse">
         <button onclick="switchPage('workTrackerPage')" class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition active:scale-95">
           <svg class="w-6 h-6 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -355,16 +355,20 @@
       document.documentElement.classList.remove('dark');
     }
 
+    // إصلاح كامل لمشكلة التنقل والاختفاء المفاجئ
     window.switchPage = function(pageId) {
       document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
-        setTimeout(() => { page.style.display = 'none'; }, 200); // إخفاء بعد الأنيميشن
+        page.style.display = 'none'; // سريعة وحاسمة لمنع التداخل
       });
       const targetPage = document.getElementById(pageId);
-      targetPage.style.display = 'flex';
-      setTimeout(() => {
-        targetPage.classList.add('active');
-      }, 50);
+      if (targetPage) {
+        targetPage.style.display = 'flex';
+        // إضافة الكلاس بعد لحظة قصيرة لتشغيل الـ Animation بسلاسة
+        setTimeout(() => {
+          targetPage.classList.add('active');
+        }, 20);
+      }
     }
 
     onAuthStateChanged(auth, (user) => {
@@ -589,7 +593,6 @@
     window.deleteLog = async function(logId) {
       if (confirm("واش متأكد بغيتي تمسح هاد السجل؟")) {
         try {
-          // المسح فوري من السيرفر، وسيتزامن تلقائياً عبر الـ Listener في لمح البصر
           await deleteDoc(doc(db, "logs", logId));
           showToast("تم مسح السجل بنجاح.", "info");
         } catch (error) {
