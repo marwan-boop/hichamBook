@@ -32,7 +32,7 @@
       display: none; 
       opacity: 0;
       transform: translateY(16px);
-      transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: opacity 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .page.active { 
       display: flex; 
@@ -44,123 +44,145 @@
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .btn-lux:active {
-      transform: scale(0.94);
+      transform: scale(0.95);
       filter: brightness(0.9);
     }
 
     /* Premium Glassmorphic Layouts */
     .glass-card {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
     }
     .dark .glass-card {
-      background: rgba(17, 24, 39, 0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .glass-nav {
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
     .dark .glass-nav {
-      background: rgba(3, 7, 18, 0.8);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(3, 7, 18, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Beautiful Theme Toggle Switch */
+    .theme-btn-icon {
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .dark .theme-btn-icon {
+      transform: rotate(360deg);
     }
 
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 10px; }
   </style>
 </head>
-<body class="text-slate-900 dark:text-slate-100 min-h-screen flex flex-col justify-between">
+<body class="text-slate-900 dark:text-slate-100 min-h-screen flex flex-col justify-between selection:bg-blue-500/20">
 
   <!-- ==================== 🔔 Toasts moderns ==================== -->
   <div id="toastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-3 w-full max-w-sm px-4"></div>
 
   <!-- ==================== 1. Login ==================== -->
-  <div id="loginPage" class="page active min-h-screen flex-col items-center justify-center p-5 bg-gradient-to-tr from-slate-50 to-blue-50/50 dark:from-[#030712] dark:to-[#0b1329]">
-    <div class="glass-card p-8 rounded-[32px] shadow-2xl w-full max-w-md relative">
-      <button onclick="toggleDarkMode()" class="absolute top-6 left-6 p-3 rounded-2xl bg-white/60 dark:bg-slate-800/60 text-xl btn-lux border border-black/5 dark:border-white/5 shadow-sm">🌓</button>
+  <div id="loginPage" class="page active min-h-screen flex-col items-center justify-center p-5 bg-gradient-to-tr from-slate-50 via-blue-50/20 to-slate-100 dark:from-[#030712] dark:via-[#080f24] dark:to-[#02040a]">
+    <div class="glass-card p-8 rounded-[32px] shadow-2xl shadow-black/5 dark:shadow-none w-full max-w-md relative border">
+      
+      <!-- Premium Mode Switcher -->
+      <button onclick="toggleDarkMode()" class="absolute top-6 left-6 p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 text-xl btn-lux border border-black/5 dark:border-white/5 shadow-sm flex items-center justify-center w-11 h-11">
+        <span class="theme-btn-icon block dark:hidden">🌙</span>
+        <span class="theme-btn-icon hidden dark:block">☀️</span>
+      </button>
 
       <div class="text-center mb-9">
         <h2 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">تسجيل الدخول</h2>
         <p class="text-slate-500 dark:text-slate-400 mt-2.5 text-sm font-medium">مرحبا بك! أدخل نمرة التلفون والكود باش تبدا</p>
       </div>
 
-      <form id="loginForm" class="space-y-6">
+      <form id="loginForm" class="space-y-5">
         <div>
-          <label class="block text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider mb-2 mr-1">رقم الهاتف</label>
+          <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">رقم الهاتف</label>
           <input type="tel" id="loginPhone" placeholder="0612345678" required 
-                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800 dark:bg-slate-950/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-left transition" dir="ltr">
+                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 text-left transition text-base font-medium" dir="ltr">
         </div>
 
         <div>
-          <label class="block text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider mb-2 mr-1">كلمة المرور</label>
+          <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">كلمة المرور</label>
           <input type="password" id="loginPassword" placeholder="••••••••" required 
-                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800 dark:bg-slate-950/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-left transition" dir="ltr">
+                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 text-left transition text-base font-medium" dir="ltr">
         </div>
 
-        <button type="submit" class="w-full bg-slate-900 dark:bg-blue-600 hover:opacity-90 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-blue-600/10 dark:shadow-none btn-lux">
+        <button type="submit" class="w-full bg-slate-900 dark:bg-blue-600 hover:opacity-95 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-slate-900/10 dark:shadow-blue-600/10 btn-lux text-base mt-2">
           دخول للتطبيق
         </button>
       </form>
 
       <div class="mt-8 text-center text-sm">
         <span class="text-slate-400 dark:text-slate-500">ما عندكش حساب؟</span>
-        <button onclick="switchPage('registerPage')" class="text-blue-600 dark:text-blue-400 font-extrabold hover:underline ml-1">إنشاء حساب جديد</button>
+        <button onclick="switchPage('registerPage')" class="text-blue-600 dark:text-blue-400 font-black hover:underline ml-1">إنشاء حساب جديد</button>
       </div>
     </div>
   </div>
 
   <!-- ==================== 2. Register ==================== -->
-  <div id="registerPage" class="page min-h-screen flex-col items-center justify-center p-5 bg-gradient-to-tr from-slate-50 to-emerald-50/30 dark:from-[#030712] dark:to-[#041a16]">
-    <div class="glass-card p-8 rounded-[32px] shadow-2xl w-full max-w-md relative">
+  <div id="registerPage" class="page min-h-screen flex-col items-center justify-center p-5 bg-gradient-to-tr from-slate-50 via-emerald-50/10 to-slate-100 dark:from-[#030712] dark:via-[#041612] dark:to-[#02040a]">
+    <div class="glass-card p-8 rounded-[32px] shadow-2xl shadow-black/5 dark:shadow-none w-full max-w-md relative border">
+      
+      <button onclick="toggleDarkMode()" class="absolute top-6 left-6 p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 text-xl btn-lux border border-black/5 dark:border-white/5 shadow-sm flex items-center justify-center w-11 h-11">
+        <span class="theme-btn-icon block dark:hidden">🌙</span>
+        <span class="theme-btn-icon hidden dark:block">☀️</span>
+      </button>
+
       <div class="text-center mb-9">
         <h2 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">حساب جديد</h2>
         <p class="text-slate-500 dark:text-slate-400 mt-2.5 text-sm font-medium">سجل دغيا وبطريقة آمنة فابور</p>
       </div>
 
-      <form id="registerForm" class="space-y-6">
+      <form id="registerForm" class="space-y-5">
         <div>
-          <label class="block text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider mb-2 mr-1">رقم الهاتف</label>
+          <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">رقم الهاتف</label>
           <input type="tel" id="registerPhone" placeholder="0612345678" required 
-                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800 dark:bg-slate-950/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-left transition" dir="ltr">
+                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-left transition text-base font-medium" dir="ltr">
         </div>
 
         <div>
-          <label class="block text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider mb-2 mr-1">كلمة المرور</label>
+          <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">كلمة المرور</label>
           <input type="password" id="registerPassword" placeholder="••••••••" required 
-                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800 dark:bg-slate-950/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-left transition" dir="ltr">
+                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-left transition text-base font-medium" dir="ltr">
         </div>
 
-        <button type="submit" class="w-full bg-emerald-600 hover:opacity-90 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-emerald-600/10 btn-lux">
+        <button type="submit" class="w-full bg-emerald-600 hover:opacity-95 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-emerald-600/10 btn-lux text-base mt-2">
           إنشاء الحساب والولوج
         </button>
       </form>
 
       <div class="mt-8 text-center text-sm">
         <span class="text-slate-400 dark:text-slate-500">عندك حساب ديجا؟</span>
-        <button onclick="switchPage('loginPage')" class="text-blue-600 dark:text-blue-400 font-extrabold hover:underline ml-1">تسجيل الدخول</button>
+        <button onclick="switchPage('loginPage')" class="text-blue-600 dark:text-blue-400 font-black hover:underline ml-1">تسجيل الدخول</button>
       </div>
     </div>
   </div>
 
   <!-- ==================== 3. Main List ==================== -->
-  <div id="mainPage" class="page min-h-screen flex-col justify-between">
+  <div id="mainPage" class="page min-h-screen flex-col justify-between bg-slate-50/50 dark:bg-[#030712]">
     <header class="glass-nav py-4 px-6 flex justify-between items-center sticky top-0 z-10 shadow-sm w-full">
-      <div class="flex items-center space-x-3 space-x-reverse">
-        <h1 class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300">لائحة العمال</h1>
-        <button onclick="requestNotificationPermission()" class="p-2.5 bg-amber-500/10 rounded-xl text-amber-600 dark:text-amber-400 btn-lux">🔔</button>
-        <button onclick="toggleDarkMode()" class="p-2.5 bg-slate-100 dark:bg-slate-800/80 rounded-xl btn-lux">🌓</button>
+      <div class="flex items-center space-x-2 space-x-reverse">
+        <h1 class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-950 to-slate-700 dark:from-white dark:to-slate-300 ml-1">لائحة العمال</h1>
+        <button onclick="requestNotificationPermission()" class="p-2.5 bg-amber-500/10 rounded-xl text-amber-600 dark:text-amber-400 btn-lux text-base">🔔</button>
+        <button onclick="toggleDarkMode()" class="p-2.5 bg-slate-100 dark:bg-slate-900/80 rounded-xl btn-lux flex items-center justify-center w-10 h-10 border border-black/5 dark:border-white/5">
+          <span class="theme-btn-icon block dark:hidden">🌙</span>
+          <span class="theme-btn-icon hidden dark:block">☀️</span>
+        </button>
       </div>
-      <button onclick="logout()" class="text-rose-500 font-bold px-4 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/20 btn-lux">خروج</button>
+      <button onclick="logout()" class="text-rose-500 font-bold px-4 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-500/10 btn-lux text-sm">خروج</button>
     </header>
 
     <main class="flex-1 p-6 max-w-md mx-auto w-full space-y-4 overflow-y-auto">
@@ -172,11 +194,11 @@
       </div>
     </main>
 
-    <footer class="glass-nav p-4 max-w-md mx-auto w-full sticky bottom-0 border-t border-black/5 rounded-t-[24px]">
+    <footer class="glass-nav p-4 max-w-md mx-auto w-full sticky bottom-0 border-t border-black/5 dark:border-white/5 rounded-t-[28px] shadow-lg">
       <form id="addWorkerForm" class="flex items-center space-x-3 space-x-reverse">
         <input type="text" id="workerNameInput" placeholder="سمية الخدام الجديد..." required
-               class="flex-1 px-4 py-3.5 border border-slate-200 dark:border-slate-800 dark:bg-slate-900/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 shadow-sm">
-        <button type="submit" class="bg-blue-600 text-white font-bold px-6 py-3.5 rounded-2xl shadow-md btn-lux">
+               class="flex-1 px-4 py-3.5 border border-slate-200 dark:border-slate-800 dark:bg-slate-900/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 shadow-sm font-medium text-sm">
+        <button type="submit" class="bg-blue-600 hover:opacity-95 text-white font-bold px-6 py-3.5 rounded-2xl shadow-md btn-lux text-sm">
           إضافة
         </button>
       </form>
@@ -185,44 +207,47 @@
 
   <!-- ==================== 4. Work Tracker ==================== -->
   <div id="workTrackerPage" class="page min-h-screen flex-col p-5 bg-slate-50 dark:bg-[#030712]">
-    <header class="flex items-center justify-between py-3 mb-6 w-full">
-      <button onclick="switchPage('mainPage')" class="p-3 bg-white dark:bg-slate-800 text-slate-700 dark:text-white rounded-2xl border border-black/5 dark:border-white/5 shadow-sm btn-lux">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    <header class="flex items-center justify-between py-3 mb-6 w-full max-w-md mx-auto">
+      <button onclick="switchPage('mainPage')" class="p-3 bg-white dark:bg-slate-900 text-slate-700 dark:text-white rounded-2xl border border-black/5 dark:border-white/5 shadow-sm btn-lux">
+        <svg class="w-5 h-5 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
       </button>
-      <div class="px-6 py-2.5 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-black/5 dark:border-white/5">
-        <h1 id="workerNameDisplay" class="text-xl font-black text-slate-800 dark:text-white">اسم العامل</h1>
+      <div class="px-5 py-2.5 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 flex-1 mx-3 text-center">
+        <h1 id="workerNameDisplay" class="text-lg font-black text-slate-800 dark:text-white truncate">اسم العامل</h1>
       </div>
-      <button onclick="toggleDarkMode()" class="p-3 bg-white dark:bg-slate-800 text-slate-700 dark:text-white rounded-2xl border border-black/5 dark:border-white/5 shadow-sm btn-lux">🌓</button>
+      <button onclick="toggleDarkMode()" class="p-3 bg-white dark:bg-slate-900 text-slate-700 dark:text-white rounded-2xl border border-black/5 dark:border-white/5 shadow-sm btn-lux flex items-center justify-center w-11 h-11">
+        <span class="theme-btn-icon block dark:hidden">🌙</span>
+        <span class="theme-btn-icon hidden dark:block">☀️</span>
+      </button>
     </header>
 
-    <main class="flex-1 flex flex-col items-center max-w-md mx-auto w-full space-y-6">
-      <div class="w-full glass-card p-6 rounded-[28px] shadow-sm flex flex-col space-y-5">
+    <main class="flex-1 flex flex-col items-center max-w-md mx-auto w-full space-y-5">
+      <div class="w-full glass-card p-6 rounded-[32px] shadow-sm flex flex-col space-y-5 border">
         
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-4">
           <span class="text-base font-bold text-slate-700 dark:text-slate-300">العمل (واش خدم اليوم؟)</span>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="logStatus" class="sr-only peer">
-            <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:content-[''] after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-500"></div>
+            <div class="w-12 h-7 bg-slate-200 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:content-[''] after:content-[''] after:absolute after:top-[4px] after:right-[4px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-500 shadow-sm"></div>
           </label>
         </div>
 
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-4">
           <span class="text-base font-bold text-slate-700 dark:text-slate-300">المصروف / السلف (DH)</span>
           <input type="number" id="logExpense" placeholder="0"
-                 class="w-28 px-2 py-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-base font-extrabold focus:outline-none text-center">
+                 class="w-28 px-3 py-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-base font-black focus:outline-none text-center focus:ring-1 focus:ring-blue-500">
         </div>
 
         <div class="flex items-center justify-between">
           <span class="text-base font-bold text-slate-700 dark:text-slate-300">التاريخ</span>
-          <input type="date" id="logDate" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-bold focus:outline-none text-sm cursor-pointer">
+          <input type="date" id="logDate" class="px-3 py-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-bold focus:outline-none text-sm cursor-pointer focus:ring-1 focus:ring-blue-500">
         </div>
         
       </div>
     </main>
 
-    <footer class="mt-8 flex justify-center space-x-4 space-x-reverse max-w-md mx-auto w-full sticky bottom-4">
-        <button type="submit" form="addLogForm" id="saveLogBtn" class="flex-1 py-4 bg-slate-900 dark:bg-blue-600 text-white text-base font-bold rounded-2xl shadow-xl btn-lux">إضافة السجل</button>
-        <button type="button" onclick="openWorkerDetails()" class="flex-1 py-4 bg-emerald-600 text-white text-base font-bold rounded-2xl shadow-xl btn-lux">جدول الحسابات</button>
+    <footer class="mt-6 flex justify-center space-x-3 space-x-reverse max-w-md mx-auto w-full sticky bottom-4">
+        <button type="submit" form="addLogForm" id="saveLogBtn" class="flex-1 py-4 bg-slate-900 dark:bg-blue-600 text-white text-base font-bold rounded-2xl shadow-xl shadow-slate-950/10 dark:shadow-blue-600/10 btn-lux">إضافة السجل</button>
+        <button type="button" onclick="openWorkerDetails()" class="flex-1 py-4 bg-emerald-600 text-white text-base font-bold rounded-2xl shadow-xl shadow-emerald-600/10 btn-lux">جدول الحسابات</button>
     </footer>
   </div>
 
@@ -230,10 +255,10 @@
   <div id="detailsPage" class="page min-h-screen flex-col justify-between bg-slate-50 dark:bg-[#030712]">
     <header class="glass-nav py-4 px-5 flex justify-between items-center sticky top-0 z-10 w-full shadow-sm">
       <div class="flex items-center space-x-3 space-x-reverse">
-        <button onclick="switchPage('workTrackerPage')" class="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl btn-lux">
-          <svg class="w-5 h-5 text-slate-700 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        <button onclick="switchPage('workTrackerPage')" class="p-2.5 bg-slate-100 dark:bg-slate-900 rounded-xl border border-black/5 dark:border-white/5 btn-lux">
+          <svg class="w-5 h-5 text-slate-700 dark:text-white transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         </button>
-        <h1 id="selectedWorkerName" class="text-lg font-black text-slate-900 dark:text-white">حسابات العامل</h1>
+        <h1 id="selectedWorkerName" class="text-base font-black text-slate-900 dark:text-white truncate max-w-[120px]">حسابات العامل</h1>
       </div>
       
       <div class="flex items-center gap-2">
@@ -243,6 +268,10 @@
         <div class="bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-sm">
           <span id="totalDays">0</span> أيام
         </div>
+        <button onclick="toggleDarkMode()" class="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl btn-lux flex items-center justify-center w-8 h-8 border border-black/5 dark:border-white/5 text-xs">
+          <span class="theme-btn-icon block dark:hidden">🌙</span>
+          <span class="theme-btn-icon hidden dark:block">☀️</span>
+        </button>
       </div>
     </header>
 
@@ -250,9 +279,9 @@
       <div id="logsList" class="space-y-3"></div>
     </main>
 
-    <footer class="glass-nav p-4 max-w-md mx-auto w-full flex space-x-3 space-x-reverse sticky bottom-0 border-t border-black/5 rounded-t-[24px]">
-      <button onclick="switchPage('mainPage')" class="flex-1 py-3.5 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white font-bold rounded-xl text-center btn-lux">الرئيسية</button>
-      <button onclick="switchPage('workTrackerPage')" class="flex-1 py-3.5 bg-blue-600 text-white font-bold rounded-xl text-center btn-lux">رجوع للتتبع</button>
+    <footer class="glass-nav p-4 max-w-md mx-auto w-full flex space-x-3 space-x-reverse sticky bottom-0 border-t border-black/5 dark:border-white/5 rounded-t-[28px] shadow-lg">
+      <button onclick="switchPage('mainPage')" class="flex-1 py-3.5 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-white font-bold rounded-2xl text-center border border-black/5 dark:border-white/5 btn-lux text-sm">الرئيسية</button>
+      <button onclick="switchPage('workTrackerPage')" class="flex-1 py-3.5 bg-blue-600 text-white font-bold rounded-2xl text-center btn-lux text-sm">رجوع للتتبع</button>
     </footer>
   </div>
 
@@ -381,13 +410,13 @@
           const w = docSnap.data();
           const id = docSnap.id;
           const card = document.createElement('div');
-          card.className = "flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/80 cursor-pointer btn-lux";
+          card.className = "flex items-center justify-between bg-white dark:bg-slate-900/90 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/80 cursor-pointer btn-lux";
           card.innerHTML = `
             <div class="flex items-center space-x-3 space-x-reverse flex-1" onclick="openWorkTracker('${id}', '${w.name}')">
-              <div class="w-11 h-11 rounded-xl bg-slate-900 dark:bg-blue-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+              <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-blue-600 dark:to-blue-500 text-white flex items-center justify-center font-black text-base shadow-md">
                 ${w.name.charAt(0).toUpperCase()}
               </div>
-              <span class="text-slate-800 dark:text-slate-100 font-bold text-base">${w.name}</span>
+              <span class="text-slate-800 dark:text-slate-100 font-bold text-base mr-3">${w.name}</span>
             </div>
             <button onclick="event.stopPropagation(); deleteWorker('${id}')" class="text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 p-2.5 rounded-xl transition">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -415,7 +444,6 @@
       switchPage('workTrackerPage');
     }
 
-    // هنا الكود المصلح ديال الحفظ الفوري
     document.getElementById('saveLogBtn').addEventListener('click', async (e) => {
       e.preventDefault();
       const expense = parseFloat(document.getElementById('logExpense').value) || 0;
@@ -439,10 +467,10 @@
           status: status,
           dateString: selectedDateString,
           dateFormatted: formattedDate,
-          timestamp: selectedDate.getTime() // كنحفظو التوقيت بـ الميلي ثانية للترتيب الدقيق فـ الفرونت إيند
+          timestamp: selectedDate.getTime()
         });
 
-        showToast("تم حفظ اليومية بنجاح بنجاح!");
+        showToast("تم حفظ اليومية بنجاح!");
         document.getElementById('logExpense').value = "";
         document.getElementById('logStatus').checked = false;
       } catch (error) {
@@ -458,7 +486,6 @@
       listenToLogs(selectedWorkerId);
     }
 
-    // حل مشكلة عدم ظهور التحديث فالبلاصة: حذفنا orderBy من الكويري المعقد ورتبنا البيانات مباشرة فالمتصفح لتفادي مشاكل الفهرسة (Index) فـ فايربيز
     function listenToLogs(workerId) {
       if (unsubscribeLogs) unsubscribeLogs();
 
@@ -477,7 +504,6 @@
           return;
         }
 
-        // تحويل السجلات لمصفوفة وترتيبها من الأحدث للأقدم
         let logsArray = [];
         snapshot.forEach(docSnap => {
           logsArray.push({ id: docSnap.id, ...docSnap.data() });
@@ -492,15 +518,15 @@
           const statusBg = isWorked ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
 
           const logCard = document.createElement('div');
-          logCard.className = "bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex justify-between items-center";
+          logCard.className = "bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/60 flex justify-between items-center";
           logCard.innerHTML = `
             <div class="space-y-1">
               <span class="text-xs text-slate-400 dark:text-slate-500 block font-bold">${log.dateFormatted}</span>
-              <span class="font-extrabold text-slate-800 dark:text-slate-100 text-base">${log.expense} DH</span>
+              <span class="font-black text-slate-800 dark:text-slate-100 text-base">${log.expense} DH</span>
             </div>
             <div class="flex items-center space-x-3 space-x-reverse">
-              <span class="px-3 py-1 rounded-xl text-xs font-black ${statusBg}">${log.status}</span>
-              <button onclick="deleteLog('${log.id}')" class="text-rose-500 bg-rose-50 dark:bg-rose-950/30 p-2.5 rounded-xl border border-rose-500/10 hover:bg-rose-100 transition duration-200">
+              <span class="px-3 py-1 rounded-xl text-xs font-black ${statusBg} mr-2">${log.status}</span>
+              <button onclick="deleteLog('${log.id}')" class="text-rose-500 bg-rose-50 dark:bg-rose-950/20 p-2.5 rounded-xl border border-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-900/30 transition duration-200">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
               </button>
             </div>
