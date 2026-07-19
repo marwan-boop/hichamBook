@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Premium Worker Tracker v4.1</title>
+  <title>Premium Worker Tracker v4.2</title>
   
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#030712">
@@ -92,7 +92,7 @@
   <!-- ==================== 🔔 Toasts ==================== -->
   <div id="toastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-3 w-full max-w-sm px-4"></div>
 
-  <!-- هاد حقل الإدخال مخفي كنخدمو بيه لتعديل صورة العمال القدامى -->
+  <!-- حقل إدخال مخفي لتعديل صورة العمال القدامى -->
   <input type="file" id="editAvatarHiddenInput" accept="image/*" class="hidden">
 
   <!-- ==================== 1. Login ==================== -->
@@ -120,7 +120,7 @@
         <button type="submit" class="w-full bg-slate-900 dark:bg-blue-600 hover:opacity-95 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-slate-900/10 dark:shadow-blue-600/10 btn-lux text-base mt-2">دخول للتطبيق</button>
       </form>
       <div class="mt-8 text-center text-sm">
-        <span class="text-slate-400 dark:text-slate-500">ما عندكش حساب？</span>
+        <span class="text-slate-400 dark:text-slate-500">ما عندكش حساب؟</span>
         <button onclick="switchPage('registerPage')" class="text-blue-600 dark:text-blue-400 font-black hover:underline ml-1">إنشاء حساب جديد</button>
       </div>
     </div>
@@ -148,10 +148,10 @@
           <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">كلمة المرور</label>
           <input type="password" id="registerPassword" placeholder="••••••••" required class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-left transition text-base font-medium" dir="ltr">
         </div>
-        <button type="submit" class="w-full bg-emerald-600 hover:opacity-95 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-emerald-600/10 btn-lux text-base mt-2">إنشاء الحساب والولووج</button>
+        <button type="submit" class="w-full bg-emerald-600 hover:opacity-95 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-emerald-600/10 btn-lux text-base mt-2">إنشاء الحساب والولوج</button>
       </form>
       <div class="mt-8 text-center text-sm">
-        <span class="text-slate-400 dark:text-slate-500">عندك حساب ديجا？</span>
+        <span class="text-slate-400 dark:text-slate-500">عندك حساب ديجا؟</span>
         <button onclick="switchPage('loginPage')" class="text-blue-600 dark:text-blue-400 font-black hover:underline ml-1">تسجيل الدخول</button>
       </div>
     </div>
@@ -289,12 +289,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, updateDoc, query, where, onSnapshot, doc, deleteDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"; // تم الاستيراد من الكور
-    import {  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    
-    // تصحيح الاستيراد المزدوج لتفادي أي خطأ
-    const FirestoreSDK = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
-    const { getFirestore: gFS, collection: col, addDoc: aD, updateDoc: uD, query: qy, where: wh, onSnapshot: oS, doc: dc, deleteDoc: dD, enableIndexedDbPersistence: eIDP } = FirestoreSDK;
+    import { getFirestore, collection, addDoc, updateDoc, query, where, onSnapshot, doc, deleteDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBU-gtVFbI7QEGsZxnESkShv4DlV81o3NQ",
@@ -307,14 +302,14 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = gFS(app);
+    const db = getFirestore(app);
 
-    try { eIDP(db); } catch (err) {}
+    try { enableIndexedDbPersistence(db); } catch (err) {}
 
     let currentUser = null;
     let selectedWorkerId = null;
     let selectedWorkerNameStr = "";
-    let workerIdForAvatarEdit = null; // متغير لحفظ آيدي العامل المراد تعديل صورته
+    let workerIdForAvatarEdit = null;
     
     let currentTotalExpense = 0;
     let currentWorkedDays = 0;
@@ -413,7 +408,7 @@
       }
 
       try {
-        await aD(col(db, "workers"), { 
+        await addDoc(collection(db, "workers"), { 
           name, 
           avatar: avatarBase64,
           ownerId: currentUser.uid, 
@@ -426,9 +421,9 @@
     });
 
     function listenToWorkers() {
-      const q = qy(col(db, "workers"), wh("ownerId", "==", currentUser.uid));
+      const q = query(collection(db, "workers"), where("ownerId", "==", currentUser.uid));
       
-      oS(q, (snapshot) => {
+      onSnapshot(q, (snapshot) => {
         const list = document.getElementById('workersList');
         list.innerHTML = "";
         if (snapshot.empty) {
@@ -460,7 +455,6 @@
               <span class="text-slate-800 dark:text-slate-100 font-bold text-base mr-3 truncate max-w-[140px]">${w.name}</span>
             </div>
             <div class="flex items-center space-x-0.5 space-x-reverse">
-              <!-- بوطونة تعديل الصورة المضافة حديثاً -->
               <button onclick="event.stopPropagation(); triggerEditAvatar('${id}')" class="text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-950/20 p-2 rounded-xl transition text-sm" title="تعديل الصورة">
                 📷
               </button>
@@ -477,13 +471,11 @@
       });
     }
 
-    // دالة فتح نافذة اختيار الصورة الجديدة
     window.triggerEditAvatar = function(id) {
       workerIdForAvatarEdit = id;
       document.getElementById('editAvatarHiddenInput').click();
     }
 
-    // الاستماع لتغيير الصورة وتحديثها مباشرة ف فايربيز للخدام القديم
     document.getElementById('editAvatarHiddenInput').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file || !workerIdForAvatarEdit) return;
@@ -491,7 +483,7 @@
       try {
         showToast("جاري تحديث الصورة...");
         const base64Img = await convertFileToBase64(file);
-        await uD(dc(db, "workers", workerIdForAvatarEdit), { avatar: base64Img });
+        await updateDoc(doc(db, "workers", workerIdForAvatarEdit), { avatar: base64Img });
         showToast("تم تحديث صورة بروفايل العامل بنجاح!");
       } catch (error) {
         showToast("فشل تحديث الصورة.", "error");
@@ -505,7 +497,7 @@
       const newName = prompt("بدل سمية الخدام:", currentName);
       if (newName && newName.trim() !== "" && newName.trim() !== currentName) {
         try {
-          await uD(dc(db, "workers", id), { name: newName.trim() });
+          await updateDoc(doc(db, "workers", id), { name: newName.trim() });
           showToast("تم تعديل الاسم بنجاح.");
         } catch (error) { showToast("فشل التعديل.", "error"); }
       }
@@ -513,7 +505,7 @@
 
     window.deleteWorker = async function(id) {
       if (confirm("واش بغيتي تمسح هاد الخدام كليا؟")) {
-        await dD(dc(db, "workers", id));
+        await deleteDoc(doc(db, "workers", id));
         showToast("تم مسح العامل.", "info");
       }
     }
@@ -545,7 +537,7 @@
         const yearNumber = selectedDate.toLocaleDateString('en-US', { year: 'numeric' });
         const formattedDate = `${dayName} - ${dayNumber}/${monthNumber}/${yearNumber}`;
 
-        await aD(col(db, "logs"), {
+        await addDoc(collection(db, "logs"), {
           workerId: selectedWorkerId,
           expense: expense,
           status: status,
@@ -570,9 +562,9 @@
 
     function listenToLogs(workerId) {
       if (unsubscribeLogs) unsubscribeLogs();
-      const q = qy(col(db, "logs"), wh("workerId", "==", workerId));
+      const q = query(collection(db, "logs"), where("workerId", "==", workerId));
       
-      unsubscribeLogs = oS(q, (snapshot) => {
+      unsubscribeLogs = onSnapshot(q, (snapshot) => {
         const list = document.getElementById('logsList');
         list.innerHTML = "";
         currentTotalExpense = 0;
@@ -631,7 +623,7 @@
     window.deleteLog = async function(logId) {
       if (confirm("واش متأكد بغيتي تمسح هاد السجل؟")) {
         try {
-          await dD(dc(db, "logs", logId));
+          await deleteDoc(doc(db, "logs", logId));
           showToast("تم مسح السجل فوراً.", "info");
         } catch (error) { showToast("وقع خطأ.", "error"); }
       }
