@@ -117,7 +117,7 @@
         <button type="submit" class="w-full bg-slate-900 dark:bg-blue-600 hover:opacity-95 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-slate-900/10 dark:shadow-blue-600/10 btn-lux text-base mt-2">دخول للتطبيق</button>
       </form>
       <div class="mt-8 text-center text-sm">
-        <span class="text-slate-400 dark:text-slate-500">ما عندكش حساب؟</span>
+        <span class="text-slate-400 dark:text-slate-500">ما عندكش حساب？</span>
         <button onclick="switchPage('registerPage')" class="text-blue-600 dark:text-blue-400 font-black hover:underline ml-1">إنشاء حساب جديد</button>
       </div>
     </div>
@@ -148,7 +148,7 @@
         <button type="submit" class="w-full bg-emerald-600 hover:opacity-95 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-emerald-600/10 btn-lux text-base mt-2">إنشاء الحساب والولووج</button>
       </form>
       <div class="mt-8 text-center text-sm">
-        <span class="text-slate-400 dark:text-slate-500">عندك حساب ديجا؟</span>
+        <span class="text-slate-400 dark:text-slate-500">عندك حساب ديجا？</span>
         <button onclick="switchPage('loginPage')" class="text-blue-600 dark:text-blue-400 font-black hover:underline ml-1">تسجيل الدخول</button>
       </div>
     </div>
@@ -271,7 +271,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, updateDoc, query, where, onSnapshot, doc, deleteDoc, orderBy, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, updateDoc, query, where, onSnapshot, doc, deleteDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBU-gtVFbI7QEGsZxnESkShv4DlV81o3NQ",
@@ -387,11 +387,10 @@
     });
 
     function listenToWorkers() {
-      // هنا السر: رتبنا بـ 'createdAt' تصاعدياً (orderBy asc) باش الأقدم يبان ديما الفوق!
+      // حيدنا orderBy من الكويري ف السيرفر باش ما تحبسش وماتطلبش Index نهائيا
       const q = query(
         collection(db, "workers"), 
-        where("ownerId", "==", currentUser.uid), 
-        orderBy("createdAt", "asc")
+        where("ownerId", "==", currentUser.uid)
       );
       
       onSnapshot(q, (snapshot) => {
@@ -401,9 +400,22 @@
           list.innerHTML = `<p class="text-slate-400 text-center py-8 font-bold">ما كاين حتى شي خدام دابا.</p>`;
           return;
         }
+
+        // غنجمعو الخدامة ف Array ونرتبوهم ف المتصفح (الأقدم أولاً)
+        let workersArray = [];
         snapshot.forEach((docSnap) => {
-          const w = docSnap.data();
-          const id = docSnap.id;
+          workersArray.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        // ترتيب تصاعدي حسب وقت الإنشاء (الأقدم هو الأول الفوق)
+        workersArray.sort((a, b) => {
+          const timeA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0;
+          const timeB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0;
+          return timeA - timeB;
+        });
+
+        workersArray.forEach((w) => {
+          const id = w.id;
           const card = document.createElement('div');
           card.className = "flex items-center justify-between bg-white dark:bg-slate-900/90 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/80 cursor-pointer btn-lux";
           
@@ -428,8 +440,6 @@
           `;
           list.appendChild(card);
         });
-      }, (error) => {
-        console.error("Firestore Order Error:", error);
       });
     }
 
@@ -563,7 +573,6 @@
       }
     }
 
-    // ==================== 📄 ميزة تصدير كشف الحساب لـ PDF ====================
     window.generateLogsPDF = function() {
       const element = document.getElementById('pdfTargetArea');
       const opt = {
@@ -579,7 +588,6 @@
       });
     }
 
-    // ==================== 🔔 ميزة نظام إشعارات الـ 6 د العشية ====================
     window.setup6PMNotification = function() {
       if (!("Notification" in window)) {
         showToast("المتصفح ديالك ما كيدعمش الإشعارات.", "error");
@@ -591,7 +599,6 @@
           document.getElementById('notiBtn').classList.add('bg-amber-500/10', 'text-amber-500');
           showToast("تم تفعيل إشعارات التذكير اليومية مع الـ 6 د العشية! 🕕");
           
-          // تشغيل فحص بالوقت
           setInterval(() => {
             const now = new Date();
             if (now.getHours() === 18 && now.getMinutes() === 0) {
@@ -600,7 +607,7 @@
                 icon: "https://cdn-icons-png.flaticon.com/512/3652/3652191.png"
               });
             }
-          }, 60000); // يفحص كل دقيقة
+          }, 60000);
         } else {
           showToast("تم رفض الإشعارات.", "error");
         }
