@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Premium Worker Tracker v2</title>
+  <title>Premium Worker Tracker v3</title>
   
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#030712">
   
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- مكتبة تصدير PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   
   <script>
     tailwind.config = {
@@ -48,7 +50,6 @@
       filter: brightness(0.9);
     }
 
-    /* Premium Glassmorphic Layouts */
     .glass-card {
       background: rgba(255, 255, 255, 0.7);
       backdrop-filter: blur(24px);
@@ -75,7 +76,6 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    /* Beautiful Theme Toggle Switch */
     .theme-btn-icon {
       transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -89,14 +89,12 @@
 </head>
 <body class="text-slate-900 dark:text-slate-100 min-h-screen flex flex-col justify-between selection:bg-blue-500/20">
 
-  <!-- ==================== 🔔 Toasts moderns ==================== -->
+  <!-- ==================== 🔔 Toasts ==================== -->
   <div id="toastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-3 w-full max-w-sm px-4"></div>
 
   <!-- ==================== 1. Login ==================== -->
   <div id="loginPage" class="page active min-h-screen flex-col items-center justify-center p-5 bg-gradient-to-tr from-slate-50 via-blue-50/20 to-slate-100 dark:from-[#030712] dark:via-[#080f24] dark:to-[#02040a]">
     <div class="glass-card p-8 rounded-[32px] shadow-2xl shadow-black/5 dark:shadow-none w-full max-w-md relative border">
-      
-      <!-- Premium Mode Switcher -->
       <button onclick="toggleDarkMode()" class="absolute top-6 left-6 p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 text-xl btn-lux border border-black/5 dark:border-white/5 shadow-sm flex items-center justify-center w-11 h-11">
         <span class="theme-btn-icon block dark:hidden">🌙</span>
         <span class="theme-btn-icon hidden dark:block">☀️</span>
@@ -110,21 +108,14 @@
       <form id="loginForm" class="space-y-5">
         <div>
           <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">رقم الهاتف</label>
-          <input type="tel" id="loginPhone" placeholder="" required 
-                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 text-left transition text-base font-medium" dir="ltr">
+          <input type="tel" id="loginPhone" placeholder="0612345678" required class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 text-left transition text-base font-medium" dir="ltr">
         </div>
-
         <div>
           <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">كلمة المرور</label>
-          <input type="password" id="loginPassword" placeholder="••••••••" required 
-                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 text-left transition text-base font-medium" dir="ltr">
+          <input type="password" id="loginPassword" placeholder="••••••••" required class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 text-left transition text-base font-medium" dir="ltr">
         </div>
-
-        <button type="submit" class="w-full bg-slate-900 dark:bg-blue-600 hover:opacity-95 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-slate-900/10 dark:shadow-blue-600/10 btn-lux text-base mt-2">
-          دخول للتطبيق
-        </button>
+        <button type="submit" class="w-full bg-slate-900 dark:bg-blue-600 hover:opacity-95 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-slate-900/10 dark:shadow-blue-600/10 btn-lux text-base mt-2">دخول للتطبيق</button>
       </form>
-
       <div class="mt-8 text-center text-sm">
         <span class="text-slate-400 dark:text-slate-500">ما عندكش حساب؟</span>
         <button onclick="switchPage('registerPage')" class="text-blue-600 dark:text-blue-400 font-black hover:underline ml-1">إنشاء حساب جديد</button>
@@ -135,7 +126,6 @@
   <!-- ==================== 2. Register ==================== -->
   <div id="registerPage" class="page min-h-screen flex-col items-center justify-center p-5 bg-gradient-to-tr from-slate-50 via-emerald-50/10 to-slate-100 dark:from-[#030712] dark:via-[#041612] dark:to-[#02040a]">
     <div class="glass-card p-8 rounded-[32px] shadow-2xl shadow-black/5 dark:shadow-none w-full max-w-md relative border">
-      
       <button onclick="toggleDarkMode()" class="absolute top-6 left-6 p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 text-xl btn-lux border border-black/5 dark:border-white/5 shadow-sm flex items-center justify-center w-11 h-11">
         <span class="theme-btn-icon block dark:hidden">🌙</span>
         <span class="theme-btn-icon hidden dark:block">☀️</span>
@@ -143,26 +133,20 @@
 
       <div class="text-center mb-9">
         <h2 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">حساب جديد</h2>
+        <p class="text-slate-500 dark:text-slate-400 mt-2.5 text-sm font-medium">سجل دغيا وبطريقة آمنة فابور</p>
       </div>
 
       <form id="registerForm" class="space-y-5">
         <div>
           <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">رقم الهاتف</label>
-          <input type="tel" id="registerPhone" placeholder="" required 
-                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-left transition text-base font-medium" dir="ltr">
+          <input type="tel" id="registerPhone" placeholder="0612345678" required class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-left transition text-base font-medium" dir="ltr">
         </div>
-
         <div>
           <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">كلمة المرور</label>
-          <input type="password" id="registerPassword" placeholder="••••••••" required 
-                 class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-left transition text-base font-medium" dir="ltr">
+          <input type="password" id="registerPassword" placeholder="••••••••" required class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-left transition text-base font-medium" dir="ltr">
         </div>
-
-        <button type="submit" class="w-full bg-emerald-600 hover:opacity-95 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-emerald-600/10 btn-lux text-base mt-2">
-          إنشاء الحساب
-        </button>
+        <button type="submit" class="w-full bg-emerald-600 hover:opacity-95 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-emerald-600/10 btn-lux text-base mt-2">إنشاء الحساب والولووج</button>
       </form>
-
       <div class="mt-8 text-center text-sm">
         <span class="text-slate-400 dark:text-slate-500">عندك حساب ديجا؟</span>
         <button onclick="switchPage('loginPage')" class="text-blue-600 dark:text-blue-400 font-black hover:underline ml-1">تسجيل الدخول</button>
@@ -175,7 +159,7 @@
     <header class="glass-nav py-4 px-6 flex justify-between items-center sticky top-0 z-10 shadow-sm w-full">
       <div class="flex items-center space-x-2 space-x-reverse">
         <h1 class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-950 to-slate-700 dark:from-white dark:to-slate-300 ml-1">لائحة العمال</h1>
-        <button onclick="requestNotificationPermission()" class="p-2.5 bg-amber-500/10 rounded-xl text-amber-600 dark:text-amber-400 btn-lux text-base">🔔</button>
+        <button onclick="setup6PMNotification()" id="notiBtn" class="p-2.5 bg-slate-100 dark:bg-slate-900 rounded-xl text-slate-600 dark:text-amber-400 btn-lux text-base transition-colors">🔔</button>
         <button onclick="toggleDarkMode()" class="p-2.5 bg-slate-100 dark:bg-slate-900/80 rounded-xl btn-lux flex items-center justify-center w-10 h-10 border border-black/5 dark:border-white/5">
           <span class="theme-btn-icon block dark:hidden">🌙</span>
           <span class="theme-btn-icon hidden dark:block">☀️</span>
@@ -194,12 +178,12 @@
     </main>
 
     <footer class="glass-nav p-4 max-w-md mx-auto w-full sticky bottom-0 border-t border-black/5 dark:border-white/5 rounded-t-[28px] shadow-lg">
-      <form id="addWorkerForm" class="flex items-center space-x-3 space-x-reverse">
-        <input type="text" id="workerNameInput" placeholder="سمية الخدام الجديد..." required
-               class="flex-1 px-4 py-3.5 border border-slate-200 dark:border-slate-800 dark:bg-slate-900/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 shadow-sm font-medium text-sm">
-        <button type="submit" class="bg-blue-600 hover:opacity-95 text-white font-bold px-6 py-3.5 rounded-2xl shadow-md btn-lux text-sm">
-          إضافة
-        </button>
+      <form id="addWorkerForm" class="flex flex-col gap-2">
+        <div class="flex items-center space-x-3 space-x-reverse">
+          <input type="text" id="workerNameInput" placeholder="سمية الخدام الجديد..." required class="flex-1 px-4 py-3.5 border border-slate-200 dark:border-slate-800 dark:bg-slate-900/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 shadow-sm font-medium text-sm">
+          <button type="submit" class="bg-blue-600 hover:opacity-95 text-white font-bold px-6 py-3.5 rounded-2xl shadow-md btn-lux text-sm">إضافة</button>
+        </div>
+        <input type="text" id="workerAvatarInput" placeholder="رابط صورة البروفايل (اختياري)..." class="w-full px-4 py-2 border border-slate-100 dark:border-slate-800/30 dark:bg-slate-900/30 rounded-xl focus:outline-none text-xs">
       </form>
     </footer>
   </div>
@@ -221,7 +205,6 @@
 
     <main class="flex-1 flex flex-col items-center max-w-md mx-auto w-full space-y-5">
       <div class="w-full glass-card p-6 rounded-[32px] shadow-sm flex flex-col space-y-5 border">
-        
         <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-4">
           <span class="text-base font-bold text-slate-700 dark:text-slate-300">العمل (واش خدم اليوم؟)</span>
           <label class="relative inline-flex items-center cursor-pointer">
@@ -231,21 +214,19 @@
         </div>
 
         <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-4">
-          <span class="text-base font-bold text-slate-700 dark:text-slate-300">المصروف (DH)</span>
-          <input type="number" id="logExpense" placeholder="0"
-                 class="w-28 px-3 py-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-base font-black focus:outline-none text-center focus:ring-1 focus:ring-blue-500">
+          <span class="text-base font-bold text-slate-700 dark:text-slate-300">المصروف / السلف (DH)</span>
+          <input type="number" id="logExpense" placeholder="0" class="w-28 px-3 py-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-base font-black focus:outline-none text-center focus:ring-1 focus:ring-blue-500">
         </div>
 
         <div class="flex items-center justify-between">
           <span class="text-base font-bold text-slate-700 dark:text-slate-300">التاريخ</span>
           <input type="date" id="logDate" class="px-3 py-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white font-bold focus:outline-none text-sm cursor-pointer focus:ring-1 focus:ring-blue-500">
         </div>
-        
       </div>
     </main>
 
     <footer class="mt-6 flex justify-center space-x-3 space-x-reverse max-w-md mx-auto w-full sticky bottom-4">
-        <button type="submit" form="addLogForm" id="saveLogBtn" class="flex-1 py-4 bg-slate-900 dark:bg-blue-600 text-white text-base font-bold rounded-2xl shadow-xl shadow-slate-950/10 dark:shadow-blue-600/10 btn-lux">إضافة السجل</button>
+        <button type="button" id="saveLogBtn" class="flex-1 py-4 bg-slate-900 dark:bg-blue-600 text-white text-base font-bold rounded-2xl shadow-xl shadow-slate-950/10 dark:shadow-blue-600/10 btn-lux">إضافة السجل</button>
         <button type="button" onclick="openWorkerDetails()" class="flex-1 py-4 bg-emerald-600 text-white text-base font-bold rounded-2xl shadow-xl shadow-emerald-600/10 btn-lux">جدول الحسابات</button>
     </footer>
   </div>
@@ -261,12 +242,8 @@
       </div>
       
       <div class="flex items-center gap-2">
-        <div class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-sm">
-          <span id="totalDebt">0</span> DH
-        </div>
-        <div class="bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-sm">
-          <span id="totalDays">0</span> أيام
-        </div>
+        <div class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-sm"><span id="totalDebt">0</span> DH</div>
+        <div class="bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-sm"><span id="totalDays">0</span> أيام</div>
         <button onclick="toggleDarkMode()" class="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl btn-lux flex items-center justify-center w-8 h-8 border border-black/5 dark:border-white/5 text-xs">
           <span class="theme-btn-icon block dark:hidden">🌙</span>
           <span class="theme-btn-icon hidden dark:block">☀️</span>
@@ -274,21 +251,27 @@
       </div>
     </header>
 
-    <main class="flex-1 p-5 max-w-md mx-auto w-full space-y-3.5 overflow-y-auto">
+    <!-- منطقة محتوى الـ PDF المستهدف -->
+    <main id="pdfTargetArea" class="flex-1 p-5 max-w-md mx-auto w-full space-y-3.5 overflow-y-auto bg-slate-50 dark:bg-[#030712]">
       <div id="logsList" class="space-y-3"></div>
     </main>
 
-    <footer class="glass-nav p-4 max-w-md mx-auto w-full flex space-x-3 space-x-reverse sticky bottom-0 border-t border-black/5 dark:border-white/5 rounded-t-[28px] shadow-lg">
-      <button onclick="switchPage('mainPage')" class="flex-1 py-3.5 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-white font-bold rounded-2xl text-center border border-black/5 dark:border-white/5 btn-lux text-sm">الرئيسية</button>
-      <button onclick="switchPage('workTrackerPage')" class="flex-1 py-3.5 bg-blue-600 text-white font-bold rounded-2xl text-center btn-lux text-sm">رجوع للتتبع</button>
+    <footer class="glass-nav p-4 max-w-md mx-auto w-full flex flex-col gap-2 sticky bottom-0 border-t border-black/5 dark:border-white/5 rounded-t-[28px] shadow-lg">
+      <button onclick="generateLogsPDF()" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black rounded-2xl text-center btn-lux text-sm shadow-md">
+        📥 تحميل كشف الحساب PDF مريكل
+      </button>
+      <div class="flex space-x-3 space-x-reverse">
+        <button onclick="switchPage('mainPage')" class="flex-1 py-3 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-white font-bold rounded-2xl text-center border border-black/5 dark:border-white/5 btn-lux text-sm">الرئيسية</button>
+        <button onclick="switchPage('workTrackerPage')" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-2xl text-center btn-lux text-sm">رجوع للتتبع</button>
+      </div>
     </footer>
   </div>
 
-  <!-- ==================== 🛠️ Firebase Logic ==================== -->
+  <!-- ==================== Firebase Logic ==================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc, orderBy, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, updateDoc, query, where, onSnapshot, doc, deleteDoc, orderBy, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBU-gtVFbI7QEGsZxnESkShv4DlV81o3NQ",
@@ -388,16 +371,29 @@
     document.getElementById('addWorkerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('workerNameInput').value.trim();
+      const avatarUrl = document.getElementById('workerAvatarInput').value.trim();
       if (!name || !currentUser) return;
       try {
-        await addDoc(collection(db, "workers"), { name, ownerId: currentUser.uid, createdAt: new Date() });
+        await addDoc(collection(db, "workers"), { 
+          name, 
+          avatar: avatarUrl || null,
+          ownerId: currentUser.uid, 
+          createdAt: new Date() 
+        });
         document.getElementById('workerNameInput').value = "";
-        showToast("تمت إضافة العامل.");
-      } catch (error) { showToast("وقع خطأ.", "error"); }
+        document.getElementById('workerAvatarInput').value = "";
+        showToast("تمت إضافة العامل بنجاح.");
+      } catch (error) { showToast("وقع خطأ أثناء الإضافة.", "error"); }
     });
 
     function listenToWorkers() {
-      const q = query(collection(db, "workers"), where("ownerId", "==", currentUser.uid));
+      // هنا السر: رتبنا بـ 'createdAt' تصاعدياً (orderBy asc) باش الأقدم يبان ديما الفوق!
+      const q = query(
+        collection(db, "workers"), 
+        where("ownerId", "==", currentUser.uid), 
+        orderBy("createdAt", "asc")
+      );
+      
       onSnapshot(q, (snapshot) => {
         const list = document.getElementById('workersList');
         list.innerHTML = "";
@@ -410,20 +406,41 @@
           const id = docSnap.id;
           const card = document.createElement('div');
           card.className = "flex items-center justify-between bg-white dark:bg-slate-900/90 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/80 cursor-pointer btn-lux";
+          
+          let avatarMarkup = `<div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-blue-600 dark:to-blue-500 text-white flex items-center justify-center font-black text-base shadow-md">${w.name.charAt(0).toUpperCase()}</div>`;
+          if (w.avatar) {
+            avatarMarkup = `<img src="${w.avatar}" alt="${w.name}" class="w-11 h-11 rounded-2xl object-cover shadow-md border border-black/5">`;
+          }
+
           card.innerHTML = `
             <div class="flex items-center space-x-3 space-x-reverse flex-1" onclick="openWorkTracker('${id}', '${w.name}')">
-              <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-blue-600 dark:to-blue-500 text-white flex items-center justify-center font-black text-base shadow-md">
-                ${w.name.charAt(0).toUpperCase()}
-              </div>
-              <span class="text-slate-800 dark:text-slate-100 font-bold text-base mr-3">${w.name}</span>
+              ${avatarMarkup}
+              <span class="text-slate-800 dark:text-slate-100 font-bold text-base mr-3 truncate max-w-[150px]">${w.name}</span>
             </div>
-            <button onclick="event.stopPropagation(); deleteWorker('${id}')" class="text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 p-2.5 rounded-xl transition">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            </button>
+            <div class="flex items-center space-x-1 space-x-reverse">
+              <button onclick="event.stopPropagation(); editWorkerName('${id}', '${w.name}')" class="text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20 p-2.5 rounded-xl transition">
+                ✏️
+              </button>
+              <button onclick="event.stopPropagation(); deleteWorker('${id}')" class="text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 p-2.5 rounded-xl transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
           `;
           list.appendChild(card);
         });
+      }, (error) => {
+        console.error("Firestore Order Error:", error);
       });
+    }
+
+    window.editWorkerName = async function(id, currentName) {
+      const newName = prompt("بدل سمية الخدام:", currentName);
+      if (newName && newName.trim() !== "" && newName.trim() !== currentName) {
+        try {
+          await updateDoc(doc(db, "workers", id), { name: newName.trim() });
+          showToast("تم تعديل الاسم بنجاح.");
+        } catch (error) { showToast("فشل التعديل.", "error"); }
+      }
     }
 
     window.deleteWorker = async function(id) {
@@ -487,7 +504,6 @@
 
     function listenToLogs(workerId) {
       if (unsubscribeLogs) unsubscribeLogs();
-
       const q = query(collection(db, "logs"), where("workerId", "==", workerId));
       
       unsubscribeLogs = onSnapshot(q, (snapshot) => {
@@ -545,6 +561,50 @@
           showToast("تم مسح السجل فوراً.", "info");
         } catch (error) { showToast("وقع خطأ.", "error"); }
       }
+    }
+
+    // ==================== 📄 ميزة تصدير كشف الحساب لـ PDF ====================
+    window.generateLogsPDF = function() {
+      const element = document.getElementById('pdfTargetArea');
+      const opt = {
+        margin:       10,
+        filename:     `كشف_حساب_${selectedWorkerNameStr}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      showToast("جاري تصنيع الـ PDF...");
+      html2pdf().set(opt).from(element).save().then(() => {
+        showToast("تم تحميل الملف بنجاح!");
+      });
+    }
+
+    // ==================== 🔔 ميزة نظام إشعارات الـ 6 د العشية ====================
+    window.setup6PMNotification = function() {
+      if (!("Notification" in window)) {
+        showToast("المتصفح ديالك ما كيدعمش الإشعارات.", "error");
+        return;
+      }
+
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          document.getElementById('notiBtn').classList.add('bg-amber-500/10', 'text-amber-500');
+          showToast("تم تفعيل إشعارات التذكير اليومية مع الـ 6 د العشية! 🕕");
+          
+          // تشغيل فحص بالوقت
+          setInterval(() => {
+            const now = new Date();
+            if (now.getHours() === 18 && now.getMinutes() === 0) {
+              new Notification("📋 تذكير العمال اليومي", {
+                body: "ساعة 6 د العشية هادي! ما تنساش تسجل الأيام والمصاريف ديال الخدامة د اليوم.",
+                icon: "https://cdn-icons-png.flaticon.com/512/3652/3652191.png"
+              });
+            }
+          }, 60000); // يفحص كل دقيقة
+        } else {
+          showToast("تم رفض الإشعارات.", "error");
+        }
+      });
     }
 
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
