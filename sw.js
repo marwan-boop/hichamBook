@@ -41,3 +41,15 @@ self.addEventListener('push', (e) => {
     self.registration.showNotification(title, options)
   );
 });
+// حط هاد الكود وسط ملف sw.js
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'check-6pm-reminder') {
+    const now = new Date();
+    if (now.getHours() === 18 && now.getMinutes() === 0) {
+      self.registration.showNotification("📋 تذكير العمال اليومي", {
+        body: "ساعة 6 د العشية هادي! ما تنساش تسجل الأيام والمصاريف ديال الخدامة د اليوم.",
+        icon: "https://cdn-icons-png.flaticon.com/512/3652/3652191.png"
+      });
+    }
+  }
+});
