@@ -95,6 +95,11 @@
   <!-- حقل إدخال مخفي لتعديل صورة العمال القدامى -->
   <input type="file" id="editAvatarHiddenInput" accept="image/*" class="hidden">
 
+  <!-- ==================== 🖼️ نافذة تكبير الصورة (WhatsApp Style) ==================== -->
+  <div id="imageViewerModal" onclick="closeImageViewer()" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 cursor-zoom-out">
+    <img id="imageViewerTarget" src="" alt="Preview" class="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl transform scale-95 transition-transform duration-300">
+  </div>
+
   <!-- ==================== 1. Login ==================== -->
   <div id="loginPage" class="page active min-h-screen flex-col items-center justify-center p-5 bg-gradient-to-tr from-slate-50 via-blue-50/20 to-slate-100 dark:from-[#030712] dark:via-[#080f24] dark:to-[#02040a]">
     <div class="glass-card p-8 rounded-[32px] shadow-2xl shadow-black/5 dark:shadow-none w-full max-w-md relative border">
@@ -111,7 +116,7 @@
       <form id="loginForm" class="space-y-5">
         <div>
           <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">رقم الهاتف</label>
-          <input type="tel" id="loginPhone" placeholder="" required class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 text-left transition text-base font-medium" dir="ltr">
+          <input type="tel" id="loginPhone" placeholder="0612345678" required class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 text-left transition text-base font-medium" dir="ltr">
         </div>
         <div>
           <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">كلمة المرور</label>
@@ -142,7 +147,7 @@
       <form id="registerForm" class="space-y-5">
         <div>
           <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">رقم الهاتف</label>
-          <input type="tel" id="registerPhone" placeholder="" required class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-left transition text-base font-medium" dir="ltr">
+          <input type="tel" id="registerPhone" placeholder="0612345678" required class="w-full px-5 py-4 border border-slate-200/80 dark:border-slate-800/80 dark:bg-slate-950/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-left transition text-base font-medium" dir="ltr">
         </div>
         <div>
           <label class="block text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 mr-1">كلمة المرور</label>
@@ -240,18 +245,19 @@
 
   <!-- ==================== 5. History Details Table ==================== -->
   <div id="detailsPage" class="page min-h-screen flex-col justify-between bg-slate-50 dark:bg-[#030712]">
-    <header class="glass-nav py-4 px-5 flex justify-between items-center sticky top-0 z-10 w-full shadow-sm">
-      <div class="flex items-center space-x-3 space-x-reverse">
-        <button onclick="switchPage('workTrackerPage')" class="p-2.5 bg-slate-100 dark:bg-slate-900 rounded-xl border border-black/5 dark:border-white/5 btn-lux">
+    <header class="glass-nav py-4 px-4 flex justify-between items-center sticky top-0 z-10 w-full shadow-sm">
+      <div class="flex items-center space-x-2 space-x-reverse">
+        <button onclick="switchPage('workTrackerPage')" class="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl border border-black/5 dark:border-white/5 btn-lux">
           <svg class="w-5 h-5 text-slate-700 dark:text-white transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         </button>
-        <h1 id="selectedWorkerName" class="text-base font-black text-slate-900 dark:text-white truncate max-w-[120px]">حسابات العامل</h1>
+        <h1 id="selectedWorkerName" class="text-xs font-black text-slate-900 dark:text-white truncate max-w-[90px]">حسابات العامل</h1>
       </div>
       
-      <div class="flex items-center gap-2">
-        <div class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-sm"><span id="totalDebt">0</span> DH</div>
-        <div class="bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-sm"><span id="totalDays">0</span> أيام</div>
-        <button onclick="toggleDarkMode()" class="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl btn-lux flex items-center justify-center w-8 h-8 border border-black/5 dark:border-white/5 text-xs">
+      <div class="flex items-center gap-1">
+        <div class="bg-blue-600 text-white px-2.5 py-1.5 rounded-xl text-[11px] font-black shadow-sm"><span id="totalDebt">0</span> DH</div>
+        <div class="bg-emerald-600 text-white px-2.5 py-1.5 rounded-xl text-[11px] font-black shadow-sm"><span id="totalDays">0</span> اشتغل</div>
+        <div class="bg-rose-600 text-white px-2.5 py-1.5 rounded-xl text-[11px] font-black shadow-sm"><span id="totalAbsentTop">0</span> غائب</div>
+        <button onclick="toggleDarkMode()" class="p-1.5 bg-slate-100 dark:bg-slate-900 rounded-xl btn-lux flex items-center justify-center w-7 h-7 border border-black/5 dark:border-white/5 text-xs">
           <span class="theme-btn-icon block dark:hidden">🌙</span>
           <span class="theme-btn-icon hidden dark:block">☀️</span>
         </button>
@@ -265,13 +271,6 @@
       </div>
 
       <div id="logsList" class="space-y-3"></div>
-
-      <div id="pdfSummaryBlock" class="mt-6 bg-slate-100 dark:bg-slate-900 p-4 rounded-2xl border-2 border-slate-300 dark:border-slate-800 space-y-2 text-sm font-bold shadow-inner">
-        <h3 class="text-base font-black border-b pb-2 text-blue-600 dark:text-blue-400">📊 خلاصة تقرير الحسابات:</h3>
-        <div class="flex justify-between"><span>إجمالي المصاريف :</span><span id="pdfTotalExpense">0 DH</span></div>
-        <div class="flex justify-between text-emerald-600"><span>عدد الأيام التي اشتغل فيها:</span><span id="pdfTotalWorked">0 أيام</span></div>
-        <div class="flex justify-between text-rose-600"><span>عدد الأيام الغائب فيها:</span><span id="pdfTotalAbsent">0 أيام</span></div>
-      </div>
     </main>
 
     <footer class="glass-nav p-4 max-w-md mx-auto w-full flex flex-col gap-2 sticky bottom-0 border-t border-black/5 dark:border-white/5 rounded-t-[28px] shadow-lg">
@@ -314,6 +313,30 @@
     let currentTotalExpense = 0;
     let currentWorkedDays = 0;
     let currentAbsentDays = 0;
+
+    // دالات عرض وتكبير الصورة (WhatsApp Preview Style)
+    window.viewImageLarge = function(imgSrc) {
+      if(!imgSrc) return;
+      const modal = document.getElementById('imageViewerModal');
+      const targetImg = document.getElementById('imageViewerTarget');
+      targetImg.src = imgSrc;
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        targetImg.classList.remove('scale-95');
+      }, 20);
+    };
+
+    window.closeImageViewer = function() {
+      const modal = document.getElementById('imageViewerModal');
+      const targetImg = document.getElementById('imageViewerTarget');
+      modal.classList.add('opacity-0');
+      targetImg.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        targetImg.src = "";
+      }, 300);
+    };
 
     window.showToast = function(message, type = 'success') {
       const container = document.getElementById('toastContainer');
@@ -446,7 +469,7 @@
           
           let avatarMarkup = `<div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-blue-600 dark:to-blue-500 text-white flex items-center justify-center font-black text-base shadow-md">${w.name.charAt(0).toUpperCase()}</div>`;
           if (w.avatar) {
-            avatarMarkup = `<img src="${w.avatar}" alt="${w.name}" class="w-11 h-11 rounded-2xl object-cover shadow-md border border-black/5">`;
+            avatarMarkup = `<img src="${w.avatar}" alt="${w.name}" onclick="event.stopPropagation(); viewImageLarge('${w.avatar}')" class="w-11 h-11 rounded-2xl object-cover shadow-md border border-black/5 cursor-zoom-in">`;
           }
 
           card.innerHTML = `
@@ -575,7 +598,7 @@
           list.innerHTML = `<p class="text-slate-400 text-center py-8 font-bold">لا توجد سجلات حالياً.</p>`;
           document.getElementById('totalDebt').innerText = "0";
           document.getElementById('totalDays').innerText = "0";
-          updatePdfCounters();
+          document.getElementById('totalAbsentTop').innerText = "0";
           return;
         }
 
@@ -609,15 +632,8 @@
 
         document.getElementById('totalDebt').innerText = currentTotalExpense;
         document.getElementById('totalDays').innerText = currentWorkedDays;
-        
-        updatePdfCounters();
+        document.getElementById('totalAbsentTop').innerText = currentAbsentDays;
       });
-    }
-
-    function updatePdfCounters() {
-      document.getElementById('pdfTotalExpense').innerText = `${currentTotalExpense} DH`;
-      document.getElementById('pdfTotalWorked').innerText = `${currentWorkedDays} أيام`;
-      document.getElementById('pdfTotalAbsent').innerText = `${currentAbsentDays} أيام`;
     }
 
     window.deleteLog = async function(logId) {
@@ -644,7 +660,7 @@
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
       
-      showToast("جاري تصنيع الـ PDF المطور...");
+      showToast("جاري تصنيع الـ PDF ...");
       
       html2pdf().set(opt).from(element).save().then(() => {
         pdfHeader.classList.add('hidden');
