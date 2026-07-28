@@ -8,7 +8,7 @@
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#030712">
   
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght=400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- مكتبة تصدير PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -81,6 +81,12 @@
     }
     .dark .theme-btn-icon {
       transform: rotate(360deg);
+    }
+
+    .no-select {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     ::-webkit-scrollbar { width: 5px; }
@@ -270,6 +276,15 @@
       </div>
     </header>
 
+    <!-- شريط التحديد والحذف التجميعي (يظهر تلقائياً عند الضغط المطول) -->
+    <div id="bulkDeleteBar" class="hidden bg-rose-950/90 border border-rose-800/80 p-3 mx-4 mt-3 rounded-2xl flex justify-between items-center shadow-xl backdrop-blur-md transition-all">
+      <span id="selectedCountText" class="text-xs font-bold text-rose-200">تم تحديد 0 عناصر</span>
+      <div class="flex gap-2">
+        <button onclick="cancelSelection()" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-xl font-bold">إلغاء</button>
+        <button onclick="deleteSelectedLogs()" class="text-xs bg-rose-600 hover:bg-rose-500 text-white font-black px-3.5 py-1.5 rounded-xl shadow-md">حذف المحدد 🗑️</button>
+      </div>
+    </div>
+
     <main id="pdfTargetArea" class="flex-1 p-5 max-w-md mx-auto w-full space-y-3.5 overflow-y-auto bg-slate-50 dark:bg-[#030712]">
       <div id="pdfHeader" class="hidden p-4 text-center border-b-2 border-slate-900 dark:border-slate-100 mb-4">
         <h2 class="text-xl font-black">كشف الحساب الرسمي للـعـامـل</h2>
@@ -319,6 +334,12 @@
     let currentTotalExpense = 0;
     let currentWorkedDays = 0;
     let currentAbsentDays = 0;
+
+    // متغيرات التحديد والحذف المتعدد
+    let isSelectionMode = false;
+    let selectedLogIds = new Set();
+    let pressTimer = null;
+    let cachedLogs = [];
 
     // دالة ضغط الصور المحسنة بوضوح HD عالي الجودة
     function resizeAndCompressImage(file) {
@@ -628,58 +649,137 @@
       listenToLogs(selectedWorkerId);
     }
 
+    function renderLogsList() {
+      const list = document.getElementById('logsList');
+      list.innerHTML = "";
+      currentTotalExpense = 0;
+      currentWorkedDays = 0;
+      currentAbsentDays = 0;
+
+      if (cachedLogs.length === 0) {
+        list.innerHTML = `<p class="text-slate-400 text-center py-8 font-bold">لا توجد سجلات حالياً.</p>`;
+        document.getElementById('totalDebt').innerText = "0";
+        document.getElementById('totalDays').innerText = "0";
+        document.getElementById('totalAbsentTop').innerText = "0";
+        return;
+      }
+
+      cachedLogs.forEach((log) => {
+        currentTotalExpense += log.expense;
+        const isWorked = log.status === "اشتغل";
+        if (isWorked) { currentWorkedDays++; } else { currentAbsentDays++; }
+        
+        const statusBg = isWorked ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+        const isChecked = selectedLogIds.has(log.id);
+
+        const logCard = document.createElement('div');
+        logCard.className = "no-select bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/60 flex justify-between items-center transition cursor-pointer select-none";
+
+        // أحداث الضغط المطول (Long Press) للتحديد
+        logCard.addEventListener('touchstart', (e) => startPress(log.id, e));
+        logCard.addEventListener('touchend', () => cancelPress());
+        logCard.addEventListener('mousedown', (e) => startPress(log.id, e));
+        logCard.addEventListener('mouseup', () => cancelPress());
+
+        logCard.onclick = function() {
+          if (isSelectionMode) {
+            toggleSelectLog(log.id);
+          }
+        };
+
+        const checkboxHTML = isSelectionMode 
+          ? `<input type="checkbox" ${isChecked ? 'checked' : ''} class="w-4 h-4 accent-rose-500 pointer-events-none rounded ml-2">` 
+          : '';
+
+        logCard.innerHTML = `
+          <div class="flex items-center space-x-2 space-x-reverse">
+            ${checkboxHTML}
+            <div class="space-y-1">
+              <span class="text-xs text-slate-400 dark:text-slate-500 block font-bold">${log.dateFormatted}</span>
+              <span class="font-black text-slate-800 dark:text-slate-100 text-base">${log.expense} DH</span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3 space-x-reverse">
+            <span class="px-3 py-1 rounded-xl text-xs font-black ${statusBg} mr-2">${log.status}</span>
+            ${!isSelectionMode ? `
+              <button onclick="event.stopPropagation(); deleteLog('${log.id}')" class="text-rose-500 bg-rose-50 dark:bg-rose-950/20 p-2.5 rounded-xl border border-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-900/30 transition duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            ` : ''}
+          </div>
+        `;
+        list.appendChild(logCard);
+      });
+
+      document.getElementById('totalDebt').innerText = currentTotalExpense;
+      document.getElementById('totalDays').innerText = currentWorkedDays;
+      document.getElementById('totalAbsentTop').innerText = currentAbsentDays;
+    }
+
     function listenToLogs(workerId) {
       if (unsubscribeLogs) unsubscribeLogs();
       const q = query(collection(db, "logs"), where("workerId", "==", workerId));
       
       unsubscribeLogs = onSnapshot(q, (snapshot) => {
-        const list = document.getElementById('logsList');
-        list.innerHTML = "";
-        currentTotalExpense = 0;
-        currentWorkedDays = 0;
-        currentAbsentDays = 0;
-
-        if (snapshot.empty) {
-          list.innerHTML = `<p class="text-slate-400 text-center py-8 font-bold">لا توجد سجلات حالياً.</p>`;
-          document.getElementById('totalDebt').innerText = "0";
-          document.getElementById('totalDays').innerText = "0";
-          document.getElementById('totalAbsentTop').innerText = "0";
-          return;
-        }
-
-        let logsArray = [];
-        snapshot.forEach(docSnap => { logsArray.push({ id: docSnap.id, ...docSnap.data() }); });
-        logsArray.sort((a, b) => b.timestamp - a.timestamp);
-
-        logsArray.forEach((log) => {
-          currentTotalExpense += log.expense;
-          const isWorked = log.status === "اشتغل";
-          if (isWorked) { currentWorkedDays++; } else { currentAbsentDays++; }
-          
-          const statusBg = isWorked ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
-
-          const logCard = document.createElement('div');
-          logCard.className = "bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/60 flex justify-between items-center";
-          logCard.innerHTML = `
-            <div class="space-y-1">
-              <span class="text-xs text-slate-400 dark:text-slate-500 block font-bold">${log.dateFormatted}</span>
-              <span class="font-black text-slate-800 dark:text-slate-100 text-base">${log.expense} DH</span>
-            </div>
-            <div class="flex items-center space-x-3 space-x-reverse">
-              <span class="px-3 py-1 rounded-xl text-xs font-black ${statusBg} mr-2">${log.status}</span>
-              <button onclick="deleteLog('${log.id}')" class="text-rose-500 bg-rose-50 dark:bg-rose-950/20 p-2.5 rounded-xl border border-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-900/30 transition duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              </button>
-            </div>
-          `;
-          list.appendChild(logCard);
-        });
-
-        document.getElementById('totalDebt').innerText = currentTotalExpense;
-        document.getElementById('totalDays').innerText = currentWorkedDays;
-        document.getElementById('totalAbsentTop').innerText = currentAbsentDays;
+        cachedLogs = [];
+        snapshot.forEach(docSnap => { cachedLogs.push({ id: docSnap.id, ...docSnap.data() }); });
+        cachedLogs.sort((a, b) => b.timestamp - a.timestamp);
+        renderLogsList();
       });
     }
+
+    // إدارة الضغط المطول (Long Press) للتحديد المتعدد
+    function startPress(logId, e) {
+      pressTimer = setTimeout(() => {
+        if (!isSelectionMode) {
+          isSelectionMode = true;
+          toggleSelectLog(logId);
+          if (navigator.vibrate) navigator.vibrate(50);
+        }
+      }, 550);
+    }
+
+    function cancelPress() {
+      clearTimeout(pressTimer);
+    }
+
+    function toggleSelectLog(logId) {
+      if (selectedLogIds.has(logId)) {
+        selectedLogIds.delete(logId);
+      } else {
+        selectedLogIds.add(logId);
+      }
+
+      if (selectedLogIds.size === 0) {
+        cancelSelection();
+      } else {
+        document.getElementById('bulkDeleteBar').classList.remove('hidden');
+        document.getElementById('selectedCountText').innerText = `تم تحديد ${selectedLogIds.size} عناصر`;
+        renderLogsList();
+      }
+    }
+
+    window.cancelSelection = function() {
+      isSelectionMode = false;
+      selectedLogIds.clear();
+      document.getElementById('bulkDeleteBar').classList.add('hidden');
+      renderLogsList();
+    };
+
+    window.deleteSelectedLogs = async function() {
+      if (selectedLogIds.size === 0) return;
+
+      if (confirm(`واش متأكد بغيتي تمسح ${selectedLogIds.size} عناصر محددة؟`)) {
+        try {
+          const deletePromises = Array.from(selectedLogIds).map(id => deleteDoc(doc(db, "logs", id)));
+          await Promise.all(deletePromises);
+          showToast("تم مسح السجلات المحسوبة بنجاح!", "info");
+          cancelSelection();
+        } catch (error) {
+          showToast("وقع خطأ أثناء الحذف.", "error");
+        }
+      }
+    };
 
     window.deleteLog = async function(logId) {
       if (confirm("واش متأكد بغيتي تمسح هاد السجل؟")) {
