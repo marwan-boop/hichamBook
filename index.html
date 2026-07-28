@@ -104,7 +104,6 @@
   <!-- ==================== 🖼️ نافذة تكبير الصورة (مع زر الإغلاق X) ==================== -->
   <div id="imageViewerModal" onclick="closeImageViewer()" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 cursor-zoom-out">
     <div class="relative max-w-full max-h-[85vh] flex items-center justify-center" onclick="event.stopPropagation()">
-      <!-- زر الإغلاق X -->
       <button onclick="closeImageViewer()" class="absolute -top-12 right-0 bg-white/20 hover:bg-white/40 text-white rounded-full p-2 w-10 h-10 flex items-center justify-center text-xl font-black transition btn-lux backdrop-blur-md">
         ✕
       </button>
@@ -240,7 +239,7 @@
         </div>
 
         <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-4">
-          <span class="text-base font-bold text-slate-700 dark:text-slate-300">المصروف / السلف (DH)</span>
+          <span class="text-base font-bold text-slate-700 dark:text-slate-300">المصروف (DH)</span>
           <input type="number" id="logExpense" placeholder="0" class="w-28 px-3 py-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-base font-black focus:outline-none text-center focus:ring-1 focus:ring-blue-500">
         </div>
 
@@ -269,7 +268,7 @@
       
       <div class="flex items-center gap-1">
         <div class="bg-indigo-600 text-white px-2.5 py-1.5 rounded-xl text-[11px] font-black shadow-sm" title="الباقي صافي للخدام"><span id="totalRemaining">0</span> DH باقي</div>
-        <div class="bg-blue-600 text-white px-2.5 py-1.5 rounded-xl text-[11px] font-black shadow-sm" title="مجموع المسحوبات والسلف"><span id="totalDebt">0</span> سلف</div>
+        <div class="bg-blue-600 text-white px-2.5 py-1.5 rounded-xl text-[11px] font-black shadow-sm" title="مجموع المسحوبات والمصاريف"><span id="totalDebt">0</span> مصروف</div>
         <div class="bg-emerald-600 text-white px-2.5 py-1.5 rounded-xl text-[11px] font-black shadow-sm"><span id="totalDays">0</span> اشتغل</div>
         <div class="bg-rose-600 text-white px-2.5 py-1.5 rounded-xl text-[11px] font-black shadow-sm"><span id="totalAbsentTop">0</span> غائب</div>
         <button onclick="toggleDarkMode()" class="p-1.5 bg-slate-100 dark:bg-slate-900 rounded-xl btn-lux flex items-center justify-center w-7 h-7 border border-black/5 dark:border-white/5 text-xs">
@@ -279,7 +278,7 @@
       </div>
     </header>
 
-    <!-- شريط التحديد والحذف التجميعي (يظهر تلقائياً عند الضغط المطول) -->
+    <!-- شريط التحديد والحذف التجميعي -->
     <div id="bulkDeleteBar" class="hidden bg-rose-950/90 border border-rose-800/80 p-3 mx-4 mt-3 rounded-2xl flex justify-between items-center shadow-xl backdrop-blur-md transition-all">
       <span id="selectedCountText" class="text-xs font-bold text-rose-200">تم تحديد 0 عناصر</span>
       <div class="flex gap-2">
@@ -339,13 +338,11 @@
     let currentWorkedDays = 0;
     let currentAbsentDays = 0;
 
-    // متغيرات التحديد والحذف المتعدد
     let isSelectionMode = false;
     let selectedLogIds = new Set();
     let pressTimer = null;
     let cachedLogs = [];
 
-    // دالة ضغط الصور المحسنة بوضوح HD عالي الجودة
     function resizeAndCompressImage(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -385,7 +382,6 @@
       });
     }
 
-    // معاينة وتكبير الصور عالية الجودة
     window.viewImageLarge = function(imgSrc) {
       if(!imgSrc) return;
       const modal = document.getElementById('imageViewerModal');
@@ -491,7 +487,7 @@
       let avatarBase64 = null;
       if (avatarFile) {
         try { 
-          showToast("جاري معالجة الصورة بجودة عالية...", "info");
+          showToast("جاري معالجة الصورة...", "info");
           avatarBase64 = await resizeAndCompressImage(avatarFile); 
         } catch (err) { 
           showToast("مشكل ف الصورة.", "error"); 
@@ -578,13 +574,13 @@
       if (!file || !workerIdForAvatarEdit) return;
 
       try {
-        showToast("جاري معالجة الصورة بجودة عالية...", "info");
+        showToast("جاري معالجة الصورة...", "info");
         const compressedBase64 = await resizeAndCompressImage(file);
         await updateDoc(doc(db, "workers", workerIdForAvatarEdit), { avatar: compressedBase64 });
-        showToast("تم تحديث صورة بروفايل العامل بنجاح! 📸");
+        showToast("تم تحديث صورة البروفايل بنجاح! 📸");
       } catch (error) {
         console.error(error);
-        showToast("فشل تحديث الصورة! تأكد من نوع الملف.", "error");
+        showToast("فشل تحديث الصورة!", "error");
       } finally {
         document.getElementById('editAvatarHiddenInput').value = "";
         workerIdForAvatarEdit = null;
@@ -606,7 +602,7 @@
           name: updatedName,
           dailyRate: updatedRate
         });
-        showToast("تم تعديل بيانات العامل بنجاح.");
+        showToast("تم تعديل الاسم والأجرة اليومية بنجاح! ✏️");
       } catch (error) { 
         showToast("فشل التعديل.", "error"); 
       }
@@ -656,7 +652,7 @@
           timestamp: selectedDate.getTime()
         });
 
-        showToast("تم حفظ اليومية بنجاح!");
+        showToast("تم حفظ اليومية والمصروف بنجاح!");
         document.getElementById('logExpense').value = "";
         document.getElementById('logStatus').checked = false;
       } catch (error) { showToast("فشل التسجيل.", "error"); }
@@ -732,7 +728,6 @@
         list.appendChild(logCard);
       });
 
-      // حساب المستحقات والباقي
       const totalEarned = currentWorkedDays * selectedWorkerDailyRate;
       const remainingBalance = totalEarned - currentTotalExpense;
 
@@ -798,7 +793,7 @@
         try {
           const deletePromises = Array.from(selectedLogIds).map(id => deleteDoc(doc(db, "logs", id)));
           await Promise.all(deletePromises);
-          showToast("تم مسح السجلات المحسوبة بنجاح!", "info");
+          showToast("تم مسح السجلات المحدد بنجاح!", "info");
           cancelSelection();
         } catch (error) {
           showToast("وقع خطأ أثناء الحذف.", "error");
@@ -830,7 +825,7 @@
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
       
-      showToast("جاري تصنيع الـ PDF المطور...", "info");
+      showToast("جاري تصنيع الـ PDF...", "info");
       
       html2pdf().set(opt).from(element).save().then(() => {
         pdfHeader.classList.add('hidden');
@@ -847,15 +842,15 @@
       }
 
       if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-        showToast("الإشعارات كطلب رابط آمن (HTTPS). يرجى إعداد SSL على GitHub Pages.", "error");
-        alert("⚠️ تنبيه أمني للمتصفح: الإشعارات ف الخلفية كتخدم غي يلا كان الموقع برابط آمن https://. تأكد من تفعيل Enforce HTTPS ف إعدادات ريبوزيتوري GitHub ديالك.");
+        showToast("الإشعارات كطلب رابط آمن (HTTPS).", "error");
+        alert("⚠️ تنبيه أمني للمتصفح: الإشعارات ف الخلفية كتخدم غي يلا كان الموقع برابط آمن https://.");
         return;
       }
 
       Notification.requestPermission().then(permission => {
         if (permission === "granted") {
           document.getElementById('notiBtn').classList.add('bg-amber-500/10', 'text-amber-500');
-          showToast("مريكل! تم تفعيل إشعارات التذكير اليومية مع الـ 6 د العشية! 🕕");
+          showToast("تم تفعيل إشعارات التذكير اليومية مع الـ 6 د العشية! 🕕");
           
           setInterval(() => {
             const now = new Date();
@@ -867,8 +862,7 @@
             }
           }, 60000);
         } else if (permission === "denied") {
-          showToast("صلاحية الإشعارات محظورة من إعدادات المتصفح.", "error");
-          alert("❌ أنت منعزل عن الإشعارات! المتصفح مسجل بلي رفضتي الصلاحية. باش تخدمها: اضغط على قفل الأمان (🔒) لي جنب رابط الموقع ف الفوق، وبدل 'Notifications' لـ 'Allow' (سماح).");
+          showToast("صلاحية الإشعارات محظورة.", "error");
         } else { showToast("تم تجاهل طلب الصلاحية.", "info"); }
       });
     }
